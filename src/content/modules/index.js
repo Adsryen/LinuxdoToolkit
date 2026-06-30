@@ -22,29 +22,36 @@ export class ModuleManager {
   async init() {
     if (this.initialized) return
 
+    const startTime = performance.now()
+
     // 初始化 settings
     await settings.init()
 
-    // 注册所有内置模块
-    this._registerBuiltInModules()
+    // 等待所有内置模块注册完成
+    await this._registerBuiltInModules()
 
-    // 根据已保存的开关状态启动模块
+    // 只初始化已启用的模块（禁用的模块延迟初始化）
     const enabledMap = settings.getEnabledModules()
-    for (const [id, module] of this.modules) {
-      const isEnabled = enabledMap[id] !== false  // 默认启用
-      const moduleSettings = await settings.getModule(id, module.defaultSettings)
+    const initPromises = []
 
-      await module.init(moduleSettings)
+    for (const [id, module] of this.modules) {
+      const isEnabled = enabledMap[id] !== false
       if (isEnabled) {
-        await module.enable()
+        initPromises.push(this._initModule(id, module))
       }
     }
 
-    // 监听模块开关变化
+    // 并行初始化所有已启用模块
+    await Promise.all(initPromises)
+
+    // 监听模块开关变化（禁用→启用时延迟初始化）
     settings.onEnabledChange(async (enabledMap) => {
       for (const [id, module] of this.modules) {
         const shouldEnable = enabledMap[id] !== false
         if (shouldEnable && !module.enabled) {
+          if (!module.started) {
+            await this._initModule(id, module)
+          }
           await module.enable()
         } else if (!shouldEnable && module.enabled) {
           await module.disable()
@@ -53,7 +60,20 @@ export class ModuleManager {
     })
 
     this.initialized = true
-    console.log(`[ModuleManager] 初始化完成，已注册 ${this.modules.size} 个模块`)
+    const elapsed = (performance.now() - startTime).toFixed(0)
+    console.log(`[ModuleManager] 初始化完成，${this.modules.size} 个模块，耗时 ${elapsed}ms`)
+  }
+
+  /**
+   * 初始化单个模块
+   */
+  async _initModule(id, module) {
+    try {
+      const moduleSettings = await settings.getModule(id, module.defaultSettings)
+      await module.init(moduleSettings)
+    } catch (e) {
+      console.error(`[ModuleManager] 模块 ${id} 初始化失败:`, e)
+    }
   }
 
   /**
@@ -237,34 +257,16 @@ export class ModuleManager {
   // ========== 内部方法 ==========
 
   /**
-   * 注册内置模块
-   * 后续每个模块完成后在此添加
+   * 注册内置模块（等待所有 import 完成）
    */
-  _registerBuiltInModules() {
-    // Phase 2: Credit 积分监控
-    import('./credit/index.js').then(({ CreditModule }) => {
-      this.register(CreditModule)
-    })
-
-    // Phase 3: Auto Browse 自动浏览
-    import('./auto-browse/index.js').then(({ AutoBrowseModule }) => {
-      this.register(AutoBrowseModule)
-    })
-
-    // Phase 4: Side Topic 话题侧栏
-    import('./side-topic/index.js').then(({ SideTopicModule }) => {
-      this.register(SideTopicModule)
-    })
-
-    // Phase 5: LD Peek 快速预览
-    // import('./peek/index.js').then(({ PeekModule }) => {
-    //   this.register(PeekModule)
-    // })
-
-    // Phase 6: UI Enhance 界面美化
-    // import('./ui-enhance/index.js').then(({ UIEnhanceModule }) => {
-    //   this.register(UIEnhanceModule)
-    // })
+  async _registerBuiltInModules() {
+    await Promise.all([
+      import('./credit/index.js').then(({ CreditModule }) => this.register(CreditModule)),
+      import('./auto-browse/index.js').then(({ AutoBrowseModule }) => this.register(AutoBrowseModule)),
+      import('./side-topic/index.js').then(({ SideTopicModule }) => this.register(SideTopicModule)),
+      import('./peek/index.js').then(({ PeekModule }) => this.register(PeekModule)),
+      import('./ui-enhance/index.js').then(({ UIEnhanceModule }) => this.register(UIEnhanceModule)),
+    ])
   }
 }
 

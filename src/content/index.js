@@ -11,6 +11,7 @@ import { ModuleManager } from './modules/index.js'
 import { Toolbar } from './toolbar/index.js'
 import { Navigation } from '../utils/navigation.js'
 import { settings } from '../utils/settings.js'
+import { ConflictDetector } from '../utils/conflict.js'
 
 /**
  * 扩展主类
@@ -46,6 +47,9 @@ class LinuxdoToolkit {
 
       // 监听来自 Popup / Background 的消息
       this.setupMessageListener()
+
+      // 冲突检测（延迟执行，不阻塞初始化）
+      setTimeout(() => new ConflictDetector().detectAndNotify(), 2000)
 
       this.initialized = true
       console.log('LinuxdoToolkit 初始化完成')

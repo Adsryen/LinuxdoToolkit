@@ -2,7 +2,7 @@
 
 # 🚀 LinuxdoToolkit
 
-**将 Linux.do 社区的油猴脚本整合为一站式浏览器扩展**
+**将 Linux.do 社区的油猴脚本与单功能扩展融合为一站式浏览器扩展**
 
 [![GitHub stars](https://img.shields.io/github/stars/Adsryen/LinuxdoToolkit?style=social)](https://github.com/Adsryen/LinuxdoToolkit/stargazers)
 [![GitHub issues](https://img.shields.io/github/issues/Adsryen/LinuxdoToolkit)](https://github.com/Adsryen/LinuxdoToolkit/issues)
@@ -14,356 +14,216 @@
 
 ## 📖 简介
 
-**LinuxdoToolkit** 是一个浏览器扩展，旨在将网络上所有适配 [Linux.do](https://linux.do) 社区的油猴脚本整合到一个统一的扩展中。
+**LinuxdoToolkit** 是一个 Manifest V3 浏览器扩展，将网络上所有适配 [Linux.do](https://linux.do) 社区的油猴脚本和单功能扩展整合到一个统一的扩展中。
 
 ### 🎯 为什么需要这个项目？
 
 - ✅ **告别脚本混乱** - 不再需要安装多个油猴脚本
 - ✅ **统一管理** - 一个扩展管理所有功能
-- ✅ **性能优化** - 避免多个脚本冲突和重复加载
-- ✅ **持续更新** - 集中维护，确保兼容性
-- ✅ **开箱即用** - 无需手动配置油猴环境
+- ✅ **性能优化** - 模块懒加载，避免多个脚本冲突
+- ✅ **冲突检测** - 自动检测并提示与其他脚本的冲突
+- ✅ **数据备份** - 完整的配置备份与恢复系统
 
 ---
 
-## ✨ 功能特性
+## ✨ 功能模块
 
-### 🔧 核心功能
+| 模块 | 图标 | 说明 | 来源 |
+|------|------|------|------|
+| **积分监控** | 💰 | 实时积分收入悬浮小组件，可拖拽 | [LINUX DO Credit 积分](https://greasyfork.org/scripts/560312) |
+| **自动浏览** | 🔄 | 自动浏览帖子、随机点赞、仿真人滚动 | [linuxdo-automation](https://greasyfork.org/scripts/490382) + ryen.js |
+| **话题侧栏** | 📋 | 可拖拽/缩放侧边面板，Feed 切换 | [linux-do-side-topic](https://github.com/Adsryen/LinuxdoToolkit/tree/main/reference) |
+| **快速预览** | 👁️ | 悬浮入口 + 抽屉预览 + 自动阅读 | [LD Peek](https://greasyfork.org/scripts/584017) |
+| **界面美化** | 🎨 | 暗黑模式增强、5 种主题、紧凑/宽屏模式 | 内置 |
 
-| 功能分类 | 功能描述 | 状态 |
-|---------|---------|------|
-| 🎨 界面美化 | 优化页面布局、主题切换、暗黑模式 | 🚧 开发中 |
-| 📊 数据统计 | 帖子热度、用户活跃度、数据可视化 | 📋 计划中 |
-| ⚡ 效率工具 | 快捷键、自动签到、快速回复 | 📋 计划中 |
-| 🔔 消息通知 | 实时提醒、桌面通知、消息管理 | 📋 计划中 |
-| 🛡️ 安全增强 | 广告过滤、隐私保护、内容净化 | 📋 计划中 |
-| 📱 体验优化 | 无限滚动、图片预览、代码高亮 | 📋 计划中 |
+### 架构特点
 
-### 🎨 特色功能
-
-- **模块化设计** - 按需启用/禁用功能
-- **自定义配置** - 灵活的设置选项
-- **主题系统** - 支持自定义主题
-- **快捷键支持** - 提高操作效率
-- **数据同步** - 配置云端同步（计划中）
+- **模块化设计** - 基于 Module 基类，统一生命周期管理
+- **懒加载** - 模块按需 import，不阻塞页面加载
+- **三层交互** - Popup（极简控制）→ 工具栏（状态聚合）→ 模块面板（专属 UI）
+- **数据安全** - 自动备份、快照回滚、JSON 导入导出
 
 ---
 
 ## 📦 安装方法
 
-### 方式一：Chrome 应用商店（推荐）
-
-> 🚧 敬请期待，即将上架
-
-### 方式二：手动安装（开发者模式）
+### 手动安装（开发者模式）
 
 1. **下载项目**
 
    ```bash
    git clone https://github.com/Adsryen/LinuxdoToolkit.git
+   cd LinuxdoToolkit
    ```
 
-2. **打开 Chrome 扩展管理页面**
+2. **安装依赖并构建**
 
-   - 在地址栏输入：`chrome://extensions/`
-   - 或者：菜单 → 更多工具 → 扩展程序
+   ```bash
+   npm install
+   npm run build
+   ```
 
-3. **启用开发者模式**
+3. **加载到 Chrome**
 
-   - 打开右上角的"开发者模式"开关
+   - 打开 `chrome://extensions/`
+   - 开启「开发者模式」
+   - 点击「加载已解压的扩展程序」
+   - 选择 `dist` 目录
 
-4. **加载扩展**
-
-   - 点击"加载已解压的扩展程序"
-   - 选择项目中的 `dist` 或 `src` 文件夹
-
-5. **完成安装** 🎉
-
-   - 扩展图标将出现在浏览器工具栏
-
-### 方式三：Firefox 附加组件
-
-> 📋 计划支持，敬请期待
+4. **访问 [linux.do](https://linux.do)**，扩展自动激活 🎉
 
 ---
 
-## 🚀 使用说明
-
-### 基本使用
-
-1. **安装完成后**，点击浏览器工具栏中的扩展图标
-2. **访问 [Linux.do](https://linux.do)**，扩展将自动激活
-3. **在设置中**启用你需要的功能模块
-
-### 功能模块管理
-
-```
-扩展图标 → 设置 → 功能模块
-├── 界面美化
-│   ├── 暗黑模式
-│   ├── 自定义主题
-│   └── 布局调整
-├── 效率工具
-│   ├── 快捷键
-│   ├── 自动签到
-│   └── 快速回复
-└── 更多模块...
-```
-
-### 快捷键
-
-| 快捷键 | 功能 |
-|--------|------|
-| `Ctrl + Shift + L` | 打开扩展设置 |
-| `Ctrl + Shift + D` | 切换暗黑模式 |
-| `Ctrl + Shift + R` | 快速回复 |
-| *更多快捷键...* | *可在设置中自定义* |
-
----
-
-## 🛠️ 开发指南
+## 🛠️ 开发
 
 ### 环境要求
 
-- **Node.js** >= 16.0.0
-- **npm** >= 8.0.0 或 **yarn** >= 1.22.0 或 **pnpm** >= 7.0.0
-
-### 项目结构
-
-```
-LinuxdoToolkit/
-├── src/
-│   ├── manifest.json        # 扩展配置文件
-│   ├── background/          # 后台脚本
-│   │   └── index.js
-│   ├── content/             # 内容脚本（注入到页面）
-│   │   ├── index.js
-│   │   └── modules/
-│   │       ├── ui/          # 界面美化模块
-│   │       ├── tools/       # 效率工具模块
-│   │       └── ...
-│   ├── popup/               # 弹出窗口
-│   │   ├── index.html
-│   │   ├── index.js
-│   │   └── styles.css
-│   ├── options/             # 设置页面
-│   │   ├── index.html
-│   │   ├── index.js
-│   │   └── styles.css
-│   ├── components/          # 公共组件
-│   ├── utils/               # 工具函数
-│   └── styles/              # 公共样式
-├── public/                  # 静态资源
-│   └── icons/               # 扩展图标
-├── reference/               # 参考脚本（油猴脚本收集）
-├── dist/                    # 构建输出
-├── scripts/                 # 构建脚本
-├── tests/                   # 测试文件
-├── .github/                 # GitHub 配置
-│   └── workflows/           # CI/CD 流程
-├── package.json
-├── vite.config.js           # Vite 配置
-├── tsconfig.json            # TypeScript 配置（可选）
-├── README.md
-├── LICENSE
-└── .gitignore
-```
-
-### 快速开始
-
-```bash
-# 1. 克隆项目
-git clone https://github.com/Adsryen/LinuxdoToolkit.git
-cd LinuxdoToolkit
-
-# 2. 安装依赖
-npm install
-# 或
-yarn install
-# 或
-pnpm install
-
-# 3. 启动开发模式
-npm run dev
-
-# 4. 构建生产版本
-npm run build
-```
+- Node.js >= 18
+- npm 或 pnpm
 
 ### 开发命令
 
 ```bash
-npm run dev          # 启动开发服务器（热更新）
-npm run build        # 构建生产版本
+npm install          # 安装依赖
+npm run dev          # 开发构建（watch 模式）
+npm run build        # 生产构建
 npm run lint         # 代码检查
-npm run format       # 代码格式化
-npm run test         # 运行测试
-npm run clean        # 清理构建文件
 ```
 
-### 添加新功能模块
+### 项目结构
 
-1. **创建模块目录**
+```
+src/
+├── manifest.json              # MV3 清单
+├── background/index.js        # Service Worker（消息中转、备份、自动备份）
+├── content/
+│   ├── index.js               # 内容脚本入口
+│   ├── modules/
+│   │   ├── base.js            # Module 基类（生命周期接口）
+│   │   ├── index.js           # ModuleManager（注册、开关、通信）
+│   │   ├── credit/            # 💰 积分监控（2 文件）
+│   │   ├── auto-browse/       # 🔄 自动浏览（5 文件）
+│   │   ├── side-topic/        # 📋 话题侧栏（3 文件）
+│   │   ├── peek/              # 👁️ 快速预览（5 文件）
+│   │   └── ui-enhance/        # 🎨 界面美化（1 文件）
+│   └── toolbar/               # 统一浮动工具栏
+├── popup/                     # Popup 弹窗
+├── options/                   # Options 设置页
+├── styles/                    # 全局样式 + 主题 CSS 变量
+└── utils/                     # 工具库（14 个模块）
+    ├── settings.js            # 统一配置管理
+    ├── storage.js             # chrome.storage 封装
+    ├── request.js             # 网络请求（fetch + CSRF）
+    ├── navigation.js          # SPA 导航检测
+    ├── theme.js               # 主题检测
+    ├── events.js              # 模块间事件总线
+    ├── z-index.js             # z-index 层级管理
+    ├── dom.js                 # DOM 工具
+    ├── backup.js              # 备份与恢复
+    ├── conflict.js            # 冲突检测
+    └── i18n.js                # 国际化（中/英）
+```
 
-   ```bash
-   mkdir src/content/modules/your-module
-   ```
+### 新增模块流程
 
-2. **创建模块文件**
+1. 在 `src/content/modules/` 下创建目录
+2. 继承 `Module` 基类：
 
-   ```javascript
-   // src/content/modules/your-module/index.js
-   export default {
-     name: 'your-module',
-     description: '模块描述',
-     enabled: true,
-     
-     // 初始化
-     init() {
-       console.log('模块已初始化')
-     },
-     
-     // 启用
-     enable() {
-       // 启用逻辑
-     },
-     
-     // 禁用
-     disable() {
-       // 禁用逻辑
-     }
-   }
-   ```
+```javascript
+import { Module } from '../base.js'
 
-3. **注册模块**
+export class MyModule extends Module {
+  constructor() {
+    super({
+      id: 'my-module',
+      name: '我的模块',
+      icon: '✨',
+      description: '模块描述',
+      category: 'efficiency',
+    })
+  }
 
-   在 `src/content/modules/index.js` 中注册：
+  async onInit(settings) { /* 初始化 */ }
+  onDestroy() { /* 清理 DOM/定时器/事件 */ }
+  async onEnable() { /* 启用 */ }
+  async onDisable() { /* 禁用 */ }
+  onPageChange(url, pageType) { /* 页面变化 */ }
+  getStatusBar() { return { text: '状态文本' } }
+  getSettingsSchema() { return { fields: [...] } }
+}
+```
 
-   ```javascript
-   import yourModule from './your-module'
-   
-   export const modules = [
-     // ... 其他模块
-     yourModule
-   ]
-   ```
+3. 在 `ModuleManager._registerBuiltInModules()` 中注册：
+
+```javascript
+import('./my-module/index.js').then(({ MyModule }) => this.register(MyModule))
+```
+
+### 从油猴脚本迁移
+
+| 油猴 API | 替代方案 |
+|----------|---------|
+| `GM_setValue / GM_getValue` | `chrome.storage.local` via `settings.js` |
+| `GM_addStyle` | `document.createElement('style')` |
+| `GM_xmlhttpRequest` | `fetch`（manifest.json 的 `host_permissions`） |
+| `GM_registerMenuCommand` | 工具栏状态条 + Options 页 |
+| `GM_notification` | `chrome.notifications` API |
+| `@match` | manifest.json 的 `content_scripts.matches` |
+| inline style（被 CSP 拦截） | CSS 文件 或 `document.createElement('style')` |
 
 ---
 
 ## 🤝 贡献指南
 
-我们欢迎所有形式的贡献！
-
-### 如何贡献
-
 1. **Fork** 本项目
-2. **创建** 你的功能分支 (`git checkout -b feature/AmazingFeature`)
-3. **提交** 你的更改 (`git commit -m 'Add some AmazingFeature'`)
-4. **推送到** 分支 (`git push origin feature/AmazingFeature`)
+2. **创建** 功能分支 (`git checkout -b feature/AmazingFeature`)
+3. **提交** 更改 (`git commit -m 'feat: add AmazingFeature'`)
+4. **推送** 分支 (`git push origin feature/AmazingFeature`)
 5. **打开** Pull Request
 
-### 贡献类型
-
-- 🐛 **Bug 修复** - 报告或修复 bug
-- ✨ **新功能** - 提出或实现新功能
-- 📝 **文档** - 改进文档
-- 🎨 **界面** - UI/UX 改进
-- 🌐 **翻译** - 多语言支持
-- 💡 **建议** - 提出改进建议
-
-### 提交规范
-
-我们使用 [Conventional Commits](https://www.conventionalcommits.org/) 规范：
+提交规范使用 [Conventional Commits](https://www.conventionalcommits.org/)：
 
 ```
-<type>(<scope>): <subject>
-
-# 示例
-feat(ui): 添加暗黑模式切换功能
-fix(tools): 修复自动签到失败问题
+feat(module): 添加新功能
+fix(credit): 修复积分刷新失败
 docs(readme): 更新安装说明
 ```
 
-### 报告 Bug
-
-使用 [GitHub Issues](https://github.com/Adsryen/LinuxdoToolkit/issues) 报告 bug，请包含：
-
-- 清晰的标题和描述
-- 复现步骤
-- 预期行为 vs 实际行为
-- 浏览器版本和操作系统
-- 截图或录屏（如果可能）
-
 ---
 
-## 📚 相关资源
+## 🗺️ 开发进度
 
-### 参考脚本
-
-本项目收集了以下油猴脚本作为参考（存放在 `reference/` 目录）：
-
-- 更多脚本持续收集中...
-
-### 相关链接
-
-- [Linux.do 社区](https://linux.do)
-- [Chrome 扩展开发文档](https://developer.chrome.com/docs/extensions/)
-- [Firefox 扩展开发文档](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions)
-- [Vite 官方文档](https://vitejs.dev/)
-
----
-
-## 🗺️ 开发路线图
-
-### Phase 1 - 基础框架 ✅
-
-- [x] 项目初始化
-- [x] 基础架构搭建
-- [ ] 核心模块加载系统
-- [ ] 设置管理系统
-
-### Phase 2 - 核心功能 🚧
-
-- [ ] 界面美化模块
-- [ ] 效率工具模块
-- [ ] 基础设置页面
-
-### Phase 3 - 高级功能 📋
-
-- [ ] 数据统计模块
-- [ ] 消息通知模块
-- [ ] 安全增强模块
-- [ ] 主题系统
-
-### Phase 4 - 发布与优化 📋
-
-- [ ] Chrome 应用商店上架
-- [ ] Firefox 附加组件上架
-- [ ] 性能优化
-- [ ] 用户反馈收集
+| Phase | 名称 | 状态 |
+|-------|------|------|
+| 0 | 基础设施（utils、存储、请求、导航、事件） | ✅ |
+| 1 | 模块管理器 + Popup + Options + 工具栏 | ✅ |
+| 2 | 积分监控模块 | ✅ |
+| 3 | 自动浏览模块（合并两个脚本） | ✅ |
+| 4 | 话题侧栏模块 | ✅ |
+| 5 | 快速预览模块（精简版 LD Peek） | ✅ |
+| 6 | 界面美化模块 | ✅ |
+| 7 | 打磨与发布 | 🚧 |
 
 ---
 
 ## 🙏 致谢
 
-感谢以下项目和社区的启发：
-
 - [Linux.do](https://linux.do) - 优秀的技术社区
+- [Chenyme](https://greasyfork.org/users/chenyme) - 积分监控脚本作者
+- [kaibush](https://greasyfork.org/users/kaibush) - LD Peek 作者
+- [ryen](https://greasyfork.org/users/ryen) - 自动浏览脚本作者
 - 所有油猴脚本作者的辛勤付出
-- 开源社区的无私贡献
 
 ---
 
 ## 📄 许可证
 
-本项目采用 [MIT 许可证](LICENSE) 开源。
+[MIT License](LICENSE)
 
 ---
 
 <div align="center">
 
 **如果这个项目对你有帮助，请给我们一个 ⭐️ Star！**
-
-[![Star History Chart](https://api.star-history.com/svg?repos=Adsryen/LinuxdoToolkit&type=Date)](https://star-history.com/#Adsryen/LinuxdoToolkit&Date)
 
 </div>

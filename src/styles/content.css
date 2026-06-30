@@ -1,76 +1,71 @@
 /**
  * LinuxdoToolkit - Content Script 样式
  *
- * 注入到 Linux.do 页面的自定义样式
+ * 注入到 Linux.do 页面的自定义样式。
+ * 供 UI Enhance 模块使用的主题 CSS 变量。
  */
 
-/* ==================== 暗黑模式 ==================== */
+/* ==================== 主题 CSS 变量 ==================== */
 
-/* 暗黑模式基础样式 */
-html.dark-mode {
-  filter: invert(1) hue-rotate(180deg);
+:root {
+  --ltk-primary: #3b82f6;
+  --ltk-primary-hover: #2563eb;
+  --ltk-bg: #ffffff;
+  --ltk-bg-secondary: #f8f9fa;
+  --ltk-text: #1a1a2e;
+  --ltk-text-secondary: #6b7280;
+  --ltk-border: #e5e7eb;
 }
 
-/* 暗黑模式下图片和视频保持原色 */
-html.dark-mode img,
-html.dark-mode video,
-html.dark-mode iframe,
-html.dark-mode canvas {
-  filter: invert(1) hue-rotate(180deg);
+/* 深色主题 */
+html.ltk-dark {
+  --ltk-primary: #60a5fa;
+  --ltk-primary-hover: #93bbfd;
+  --ltk-bg: #0f172a;
+  --ltk-bg-secondary: #1e293b;
+  --ltk-text: #e2e8f0;
+  --ltk-text-secondary: #94a3b8;
+  --ltk-border: #334155;
+  color-scheme: dark;
 }
 
-/* ==================== 自定义主题 ==================== */
-
-/* 蓝色主题 */
-html[data-theme="blue"] {
-  --primary-color: #1890ff;
-  --primary-hover: #40a9ff;
-  --primary-active: #096dd9;
+/* 护眼绿主题 */
+html.ltk-green {
+  --ltk-primary: #16a34a;
+  --ltk-primary-hover: #15803d;
+  --ltk-bg: #f0fdf4;
+  --ltk-bg-secondary: #dcfce7;
+  --ltk-text: #14532d;
+  --ltk-text-secondary: #166534;
+  --ltk-border: #bbf7d0;
 }
 
-/* 绿色主题 */
-html[data-theme="green"] {
-  --primary-color: #52c41a;
-  --primary-hover: #73d13d;
-  --primary-active: #389e0d;
+/* 雅紫主题 */
+html.ltk-purple {
+  --ltk-primary: #7c3aed;
+  --ltk-primary-hover: #6d28d9;
+  --ltk-bg: #faf5ff;
+  --ltk-bg-secondary: #f3e8ff;
+  --ltk-text: #3b0764;
+  --ltk-text-secondary: #6b21a8;
+  --ltk-border: #e9d5ff;
 }
 
-/* 紫色主题 */
-html[data-theme="purple"] {
-  --primary-color: #722ed1;
-  --primary-hover: #9254de;
-  --primary-active: #531dab;
+/* ==================== 暗黑模式增强 ==================== */
+
+html.ltk-dark body,
+html.ltk-dark .d-header,
+html.ltk-dark .topic-list,
+html.ltk-dark #main-outlet {
+  background-color: var(--ltk-bg) !important;
+  color: var(--ltk-text) !important;
 }
 
-/* ==================== 效率工具样式 ==================== */
+/* ==================== 自动浏览标记 ==================== */
 
-/* 快速回复按钮 */
-.linuxdo-toolkit-quick-reply {
-  position: absolute !important;
-  right: 10px !important;
-  bottom: 10px !important;
-  padding: 5px 12px !important;
-  background: linear-gradient(135deg, #1890ff, #096dd9) !important;
-  color: white !important;
-  border: none !important;
-  border-radius: 4px !important;
-  cursor: pointer !important;
-  font-size: 12px !important;
-  font-weight: 500 !important;
-  transition: all 0.2s ease !important;
-  z-index: 1000 !important;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
-}
-
-.linuxdo-toolkit-quick-reply:hover {
-  background: linear-gradient(135deg, #40a9ff, #1890ff) !important;
-  transform: translateY(-1px) !important;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3) !important;
-}
-
-.linuxdo-toolkit-quick-reply:active {
-  transform: translateY(0) !important;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+.ltk-viewed {
+  opacity: 0.6;
+  transition: opacity 0.3s;
 }
 
 /* ==================== 工具提示 ==================== */
@@ -84,113 +79,25 @@ html[data-theme="purple"] {
   font-size: 12px;
   z-index: 10000;
   pointer-events: none;
-  animation: fadeIn 0.2s ease;
+  animation: ltk-fadeIn 0.2s ease;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* ==================== 状态指示器 ==================== */
-
-.linuxdo-toolkit-status {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  padding: 8px 16px;
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  border-radius: 20px;
-  font-size: 12px;
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s ease;
-}
-
-.linuxdo-toolkit-status:hover {
-  background: rgba(0, 0, 0, 0.85);
-  transform: translateY(-2px);
-}
-
-.linuxdo-toolkit-status .status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #52c41a;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(82, 196, 26, 0.7);
-  }
-  70% {
-    box-shadow: 0 0 0 6px rgba(82, 196, 26, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(82, 196, 26, 0);
-  }
-}
-
-/* ==================== 动画 ==================== */
-
-/* 淡入动画 */
-.linuxdo-toolkit-fade-in {
-  animation: fadeIn 0.3s ease;
-}
-
-/* 滑入动画 */
-.linuxdo-toolkit-slide-in {
-  animation: slideIn 0.3s ease;
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateX(-20px);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-/* ==================== 响应式调整 ==================== */
-
-@media (max-width: 768px) {
-  .linuxdo-toolkit-quick-reply {
-    position: relative !important;
-    right: auto !important;
-    bottom: auto !important;
-    margin-top: 8px;
-    width: 100%;
-    text-align: center;
-  }
-
-  .linuxdo-toolkit-status {
-    bottom: 10px;
-    right: 10px;
-    font-size: 11px;
-    padding: 6px 12px;
-  }
+@keyframes ltk-fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* ==================== 打印样式 ==================== */
 
 @media print {
-  .linuxdo-toolkit-quick-reply,
-  .linuxdo-toolkit-status,
-  .linuxdo-toolkit-tooltip {
+  #linuxdo-toolkit-toolbar,
+  #ldc-mini,
+  #ldc-tooltip,
+  #ltk-auto-panel,
+  #ltk-side-panel,
+  #ltk-peek-btn,
+  .peek-drawer,
+  .peek-shade {
     display: none !important;
   }
 }

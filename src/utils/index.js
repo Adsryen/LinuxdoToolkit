@@ -32,6 +32,12 @@ export { DOM, injectStyles, removeStyles, createElement, waitForElement } from '
 // 设置管理
 export { settings } from './settings.js'
 
+// 冲突检测
+export { ConflictDetector } from './conflict.js'
+
+// 国际化
+export { t, setLocale, getLocale } from './i18n.js'
+
 // 备份与恢复
 export { Backup, exportAll, exportAsJSON, exportToFile, importFromJSON, importFromFile } from './backup.js'
 
