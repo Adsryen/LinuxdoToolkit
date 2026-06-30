@@ -7,8 +7,10 @@
  * - 与 background script 通信
  */
 
-// 导入模块管理器
 import { ModuleManager } from './modules/index.js'
+import { Toolbar } from './toolbar/index.js'
+import { Navigation } from '../utils/navigation.js'
+import { settings } from '../utils/settings.js'
 
 /**
  * 扩展主类
@@ -16,6 +18,8 @@ import { ModuleManager } from './modules/index.js'
 class LinuxdoToolkit {
   constructor() {
     this.moduleManager = new ModuleManager()
+    this.toolbar = null
+    this.navigation = new Navigation()
     this.initialized = false
   }
 
@@ -31,17 +35,17 @@ class LinuxdoToolkit {
     console.log('LinuxdoToolkit 初始化中...')
 
     try {
-      // 获取设置
-      const settings = await this.getSettings()
+      // 初始化模块管理器（内部会初始化 settings 和所有模块）
+      await this.moduleManager.init()
 
-      // 初始化模块管理器
-      await this.moduleManager.init(settings)
+      // 创建浮动工具栏
+      this.setupToolbar()
 
-      // 监听设置变化
-      this.setupSettingsListener()
+      // 设置 SPA 导航监听
+      this.setupNavigation()
 
-      // 监听页面变化（用于 SPA 页面）
-      this.setupPageObserver()
+      // 监听来自 Popup / Background 的消息
+      this.setupMessageListener()
 
       this.initialized = true
       console.log('LinuxdoToolkit 初始化完成')
@@ -51,61 +55,89 @@ class LinuxdoToolkit {
   }
 
   /**
-   * 获取设置
+   * 创建浮动工具栏
    */
-  async getSettings() {
-    return new Promise((resolve) => {
-      chrome.runtime.sendMessage(
-        { type: 'GET_SETTINGS' },
-        (response) => {
-          if (response.success) {
-            resolve(response.data)
-          } else {
-            console.error('获取设置失败:', response.error)
-            resolve(null)
-          }
-        }
-      )
+  setupToolbar() {
+    const globalSettings = settings.getGlobal()
+    if (globalSettings.toolbarEnabled === false) return
+
+    this.toolbar = new Toolbar(this.moduleManager)
+    this.toolbar.mount()
+  }
+
+  /**
+   * 设置 SPA 导航监听
+   */
+  setupNavigation() {
+    this.navigation.start()
+    this.navigation.on((url, pageType) => {
+      console.log('[Navigation] 页面变化:', url, pageType)
+      this.moduleManager.onPageChange(url)
     })
   }
 
   /**
-   * 监听设置变化
+   * 监听来自 Popup / Background 的消息
    */
-  setupSettingsListener() {
-    chrome.storage.onChanged.addListener((changes, namespace) => {
-      if (namespace === 'sync' && changes.settings) {
-        const newSettings = changes.settings.newValue
-        console.log('设置已更新:', newSettings)
-        this.moduleManager.updateSettings(newSettings)
-      }
+  setupMessageListener() {
+    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+      this.handleMessage(message, sender, sendResponse)
+      return true  // 保持消息通道开放
     })
   }
 
   /**
-   * 监听页面变化（SPA 路由）
+   * 处理消息
    */
-  setupPageObserver() {
-    // 监听 URL 变化
-    let lastUrl = location.href
-    const observer = new MutationObserver(() => {
-      if (location.href !== lastUrl) {
-        lastUrl = location.href
-        console.log('页面 URL 变化:', lastUrl)
-        this.moduleManager.onPageChange(lastUrl)
+  async handleMessage(message, sender, sendResponse) {
+    try {
+      switch (message.type) {
+        case 'GET_MODULE_LIST':
+          sendResponse({
+            success: true,
+            data: this.moduleManager.getModuleList()
+          })
+          break
+
+        case 'TOGGLE_MODULE':
+          await this.moduleManager.toggle(message.moduleId)
+          this.toolbar?.refreshStatusBars()
+          sendResponse({ success: true })
+          break
+
+        case 'ENABLE_MODULE':
+          await this.moduleManager.enable(message.moduleId)
+          this.toolbar?.refreshStatusBars()
+          sendResponse({ success: true })
+          break
+
+        case 'DISABLE_MODULE':
+          await this.moduleManager.disable(message.moduleId)
+          this.toolbar?.refreshStatusBars()
+          sendResponse({ success: true })
+          break
+
+        case 'GET_STATUS_BARS':
+          sendResponse({
+            success: true,
+            data: this.moduleManager.getStatusBars()
+          })
+          break
+
+        case 'GET_SETTINGS_SCHEMAS':
+          sendResponse({
+            success: true,
+            data: this.moduleManager.getSettingsSchemas()
+          })
+          break
+
+        default:
+          sendResponse({ success: false, error: '未知消息类型' })
       }
-    })
-
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true
-    })
-
-    // 监听 popstate 事件
-    window.addEventListener('popstate', () => {
-      console.log('页面导航:', location.href)
-      this.moduleManager.onPageChange(location.href)
-    })
+    } catch (error) {
+      console.error('[Message] 处理失败:', error)
+      sendResponse({ success: false, error: error.message })
+    }
   }
 }
 

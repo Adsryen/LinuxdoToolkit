@@ -29,6 +29,9 @@ export { Z_INDEX } from './z-index.js'
 // DOM 工具
 export { DOM, injectStyles, removeStyles, createElement, waitForElement } from './dom.js'
 
+// 设置管理
+export { settings } from './settings.js'
+
 // 备份与恢复
 export { Backup, exportAll, exportAsJSON, exportToFile, importFromJSON, importFromFile } from './backup.js'
 

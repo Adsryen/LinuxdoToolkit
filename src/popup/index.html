@@ -7,90 +7,37 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="popup-container">
-    <header class="popup-header">
-      <div class="logo">
-        <img src="../../public/icons/icon48.png" alt="Logo" width="32" height="32">
-        <h1>LinuxdoToolkit</h1>
-      </div>
-      <div class="version">v1.0.0</div>
-    </header>
+  <!-- Header -->
+  <header class="popup-header">
+    <div class="header-left">
+      <img src="../../public/icons/icon48.png" alt="Logo">
+      <h1>LinuxdoToolkit</h1>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" id="btn-refresh" title="刷新">🔄</button>
+      <button class="icon-btn" id="btn-options" title="设置">⚙️</button>
+    </div>
+  </header>
 
-    <main class="popup-content">
-      <div class="status-section">
-        <div class="status-indicator active"></div>
-        <span class="status-text">扩展已激活</span>
-      </div>
-
-      <div class="quick-actions">
-        <h3>快捷操作</h3>
-        <div class="action-buttons">
-          <button id="toggle-dark-mode" class="action-btn" title="切换暗黑模式">
-            <span class="icon">🌙</span>
-            <span class="label">暗黑模式</span>
-          </button>
-          <button id="auto-sign" class="action-btn" title="手动签到">
-            <span class="icon">✍️</span>
-            <span class="label">签到</span>
-          </button>
-          <button id="open-settings" class="action-btn" title="打开设置">
-            <span class="icon">⚙️</span>
-            <span class="label">设置</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="modules-section">
-        <h3>功能模块</h3>
-        <div class="module-list">
-          <div class="module-item">
-            <div class="module-info">
-              <span class="module-name">界面美化</span>
-              <span class="module-status enabled">已启用</span>
-            </div>
-            <label class="switch">
-              <input type="checkbox" id="module-ui" checked>
-              <span class="slider"></span>
-            </label>
-          </div>
-          <div class="module-item">
-            <div class="module-info">
-              <span class="module-name">效率工具</span>
-              <span class="module-status enabled">已启用</span>
-            </div>
-            <label class="switch">
-              <input type="checkbox" id="module-tools" checked>
-              <span class="slider"></span>
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <div class="stats-section">
-        <h3>使用统计</h3>
-        <div class="stats-grid">
-          <div class="stat-item">
-            <span class="stat-value">0</span>
-            <span class="stat-label">今日签到</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-value">0</span>
-            <span class="stat-label">快捷回复</span>
-          </div>
-        </div>
-      </div>
-    </main>
-
-    <footer class="popup-footer">
-      <a href="https://github.com/Adsryen/LinuxdoToolkit" target="_blank" class="footer-link">
-        GitHub
-      </a>
-      <span class="separator">•</span>
-      <a href="#" id="report-issue" class="footer-link">
-        报告问题
-      </a>
-    </footer>
+  <!-- Status -->
+  <div class="status-bar" id="status-bar">
+    <span class="status-dot"></span>
+    <span id="status-text">正在连接...</span>
   </div>
+
+  <!-- Module List -->
+  <div class="module-list" id="module-list">
+    <div class="loading">加载中...</div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="popup-footer">
+    <a href="https://github.com/Adsryen/LinuxdoToolkit" target="_blank" class="footer-link">GitHub</a>
+    <span class="footer-sep">·</span>
+    <a href="#" id="link-options" class="footer-link">设置</a>
+    <span class="footer-sep">·</span>
+    <span class="footer-link" id="version-text">v1.0.0</span>
+  </footer>
 
   <script src="index.js" type="module"></script>
 </body>

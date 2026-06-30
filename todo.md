@@ -213,71 +213,71 @@ const Z_LAYERS = {
   - [x] 剪贴板导入导出（Base64 编码的压缩 JSON）
   - [x] 版本兼容处理 — 备份文件 version 字段校验，跨版本迁移逻辑
 - [x] **重构 `utils/` 目录** — 原有通用函数迁移到 helpers.js，index.js 改为统一 re-export 入口
-- [ ] **完善模块接口规范** — 定义 Module 基类/接口，标准化生命周期
-- [ ] **完善 settings 管理** — 基于 chrome.storage 的全局配置读写
+- [x] **完善模块接口规范** — 定义 Module 基类/接口，标准化生命周期
+- [x] **完善 settings 管理** — 基于 chrome.storage 的全局配置读写
 
-### Phase 1 — 模块管理器 + Popup [当前]
+### Phase 1 — 模块管理器 + Popup ✅
 
-- [ ] **重构 ModuleManager** — 基于 Phase 0 的接口规范重写，支持动态注册/注销
-- [ ] **重写 Popup** — 极简设计：模块列表（图标+名称+toggle）+ 跳转设置
-- [ ] **模块状态通信** — Popup ↔ background ↔ content 的消息通道
-- [ ] **实现统一工具栏（页面内）** — 折叠式浮动面板，聚合模块状态
-  - [ ] 可拖拽定位，位置持久化
-  - [ ] 折叠/展开动画
-  - [ ] 模块状态条插槽机制
-  - [ ] 跟随站点暗黑模式
-- [ ] **重写 Options 页框架** — 左侧分类导航 + 右侧内容区
+- [x] **重构 ModuleManager** — 基于 Phase 0 的接口规范重写，支持动态注册/注销
+- [x] **重写 Popup** — 极简设计：模块列表（图标+名称+toggle）+ 跳转设置
+- [x] **模块状态通信** — Popup ↔ background ↔ content 的消息通道
+- [x] **实现统一工具栏（页面内）** — 折叠式浮动面板，聚合模块状态
+  - [x] 可拖拽定位，位置持久化
+  - [x] 折叠/展开动画
+  - [x] 模块状态条插槽机制
+  - [x] 跟随站点暗黑模式
+- [x] **重写 Options 页框架** — 左侧分类导航 + 右侧内容区
   - [ ] 通用表单渲染器（根据模块的 settings schema 自动生成配置 UI）
   - [ ] 快捷键配置
-  - [ ] 模块启用/禁用
-  - [ ] **备份与恢复页面** — 导出下载、文件导入、差异预览、剪贴板操作、自动快照回滚
+  - [x] 模块启用/禁用
+  - [x] **备份与恢复页面** — 导出下载、文件导入、差异预览、剪贴板操作、自动快照回滚
 
-### Phase 2 — 积分监控模块（Credit）
+### Phase 2 — 积分监控模块（Credit） ✅
 
 > 优先级最高：最简单，UI 最少，验证模块架构
 
-- [ ] **迁移 `LINUX DO Credit 积分.js`** → `src/content/modules/credit/`
-  - [ ] 悬浮数字小组件（保留可拖拽 + hover 详情）
-  - [ ] 替换 GM_* API → chrome.storage + fetch
-  - [ ] 定时刷新 + 手动刷新
-  - [ ] 暗黑模式适配
-- [ ] **接入工具栏** — 注册状态条：`积分: +3.42`
+- [x] **迁移 `LINUX DO Credit 积分.js`** → `src/content/modules/credit/`
+  - [x] 悬浮数字小组件（保留可拖拽 + hover 详情）
+  - [x] 替换 GM_* API → chrome.storage + fetch
+  - [x] 定时刷新 + 手动刷新
+  - [x] 暗黑模式适配
+- [x] **接入工具栏** — 注册状态条：`积分: +3.42`
 - [ ] **接入 Options 页** — 刷新间隔、显示位置、开关
 
-### Phase 3 — 自动浏览模块（Auto Browse）
+### Phase 3 — 自动浏览模块（Auto Browse） ✅
 
 > 合并两个功能重叠的脚本：`linuxdo-automation.user.js` + `ryen.js`
 
-- [ ] **设计统一的自动浏览引擎**
-  - [ ] 滚动控制器 — 取 ryen.js 的仿真人滚动（wheel burst + micro pause + dwell）
-  - [ ] 话题列表管理 — 取 automation 的列表扫描 + 已浏览记录
-  - [ ] 点赞系统 — 取 automation 的 API 点赞 + 上限检测
+- [x] **设计统一的自动浏览引擎**
+  - [x] 滚动控制器 — 取 ryen.js 的仿真人滚动（wheel burst + micro pause + dwell）
+  - [x] 话题列表管理 — 取 automation 的列表扫描 + 已浏览记录
+  - [x] 点赞系统 — 取 automation 的 API 点赞 + 上限检测
   - [ ] 必读文章 — 取 ryen.js 的必读列表
   - [ ] 休息机制 — 两者合并，可配置
-  - [ ] 卡住检测 — 取 automation 的心跳检测
-- [ ] **控制面板 UI**
-  - [ ] 速度预设切换（慢/正常/快/极速）
-  - [ ] 列表来源选择（最新/新帖/未读）
-  - [ ] 点赞开关 + 概率
-  - [ ] 运行状态 + 统计数据
-  - [ ] 面板支持折叠/最小化
-- [ ] **接入工具栏** — 注册状态条：`已浏览 23 帖 · 点赞 5`
-- [ ] **接入 Options 页** — 全部高级参数
+  - [x] 卡住检测 — 取 automation 的心跳检测
+- [x] **控制面板 UI**
+  - [x] 速度预设切换（慢/正常/快/极速）
+  - [x] 列表来源选择（最新/新帖/未读）
+  - [x] 点赞开关 + 概率
+  - [x] 运行状态 + 统计数据
+  - [x] 面板支持折叠/最小化
+- [x] **接入工具栏** — 注册状态条：`已浏览 23 帖 · 点赞 5`
+- [x] **接入 Options 页** — 全部高级参数
 
-### Phase 4 — 话题侧栏模块（Side Topic）
+### Phase 4 — 话题侧栏模块（Side Topic） ✅
 
-- [ ] **迁移 `linux-do-side-topic-v0.1.0`** → `src/content/modules/side-topic/`
-  - [ ] 可拖拽/缩放侧边面板
-  - [ ] 话题列表 + 实时更新
-  - [ ] Feed 切换（最新/热门/关注等）
+- [x] **迁移 `linux-do-side-topic-v0.1.0`** → `src/content/modules/side-topic/`
+  - [x] 可拖拽/缩放侧边面板
+  - [x] 话题列表 + 实时更新
+  - [x] Feed 切换（最新/新帖/未读/排行）
   - [ ] 分类筛选 + 标签筛选
   - [ ] 版本更新检测
-- [ ] **代码重构** — 原扩展是多文件结构，整合为模块化结构
-- [ ] **替换存储层** — 原用 chrome.storage 直接调用，改用 utils/storage.js
-- [ ] **接入工具栏** — 注册状态条：`12 条新内容`
-- [ ] **接入 Options 页** — 面板默认位置/大小、默认 Feed、筛选预设
+- [x] **代码重构** — 原扩展是多文件结构，整合为模块化结构
+- [x] **替换存储层** — 原用 chrome.storage 直接调用，改用 utils/settings.js
+- [x] **接入工具栏** — 注册状态条：`12 条新内容`
+- [x] **接入 Options 页** — 面板默认位置/大小、默认 Feed、筛选预设
 
-### Phase 5 — 快速预览模块（LD Peek）
+### Phase 5 — 快速预览模块（LD Peek）[当前]
 
 > 最复杂：621KB，iframe 抽屉 + 自动滚动 + 收藏夹 + 稍后读
 

@@ -47,7 +47,8 @@
 
   "host_permissions": [
     "https://linux.do/*",
-    "https://www.linux.do/*"
+    "https://www.linux.do/*",
+    "https://credit.linux.do/*"
   ],
 
   "options_page": "src/options/index.html",

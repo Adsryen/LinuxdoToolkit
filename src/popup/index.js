@@ -1,153 +1,197 @@
 /**
- * Popup 脚本
+ * Popup Script
+ *
+ * 极简控制中心：模块列表（图标+名称+toggle）+ 跳转设置
  */
 
-// DOM 元素
-const elements = {
-  toggleDarkMode: document.getElementById('toggle-dark-mode'),
-  autoSign: document.getElementById('auto-sign'),
-  openSettings: document.getElementById('open-settings'),
-  moduleUI: document.getElementById('module-ui'),
-  moduleTools: document.getElementById('module-tools'),
-  reportIssue: document.getElementById('report-issue')
+// ========== 默认模块定义（当无法连接 content script 时使用） ==========
+const DEFAULT_MODULES = [
+  { id: 'credit',      name: '积分监控',  icon: '💰', description: '实时积分收入',   category: 'data',      enabled: true },
+  { id: 'auto-browse', name: '自动浏览',  icon: '🔄', description: '自动浏览帖子',   category: 'efficiency', enabled: true },
+  { id: 'side-topic',  name: '话题侧栏',  icon: '📋', description: '侧边话题面板',   category: 'preview',   enabled: true },
+  { id: 'peek',        name: '快速预览',  icon: '👁️', description: '抽屉式预览',    category: 'preview',   enabled: true },
+  { id: 'ui-enhance',  name: '界面美化',  icon: '🎨', description: '暗黑模式/主题',  category: 'ui',        enabled: true },
+]
+
+const CATEGORY_NAMES = {
+  efficiency: '效率',
+  preview: '预览',
+  data: '数据',
+  ui: '界面',
+  other: '其他',
 }
 
-// 当前设置
-let currentSettings = null
+// ========== DOM ==========
+const $ = (sel) => document.querySelector(sel)
+const statusBar = $('#status-bar')
+const statusText = $('#status-text')
+const moduleListEl = $('#module-list')
 
-/**
- * 初始化
- */
-async function init() {
-  // 加载设置
-  await loadSettings()
+// ========== 初始化 ==========
+document.addEventListener('DOMContentLoaded', async () => {
+  const manifest = chrome.runtime.getManifest()
+  $('#version-text').textContent = `v${manifest.version}`
 
-  // 绑定事件
-  bindEvents()
+  $('#btn-options').addEventListener('click', openOptions)
+  $('#btn-refresh').addEventListener('click', loadModules)
+  $('#link-options').addEventListener('click', (e) => { e.preventDefault(); openOptions() })
 
-  // 更新 UI
-  updateUI()
+  await loadModules()
+})
 
-  console.log('Popup 已初始化')
-}
+// ========== 加载模块 ==========
+async function loadModules() {
+  moduleListEl.innerHTML = '<div class="loading">加载中...</div>'
 
-/**
- * 加载设置
- */
-async function loadSettings() {
-  return new Promise((resolve) => {
-    chrome.runtime.sendMessage(
-      { type: 'GET_SETTINGS' },
-      (response) => {
-        if (response.success) {
-          currentSettings = response.data
-        } else {
-          console.error('加载设置失败:', response.error)
-        }
-        resolve()
-      }
-    )
-  })
-}
+  let modules = null
+  let connected = false
 
-/**
- * 保存设置
- */
-async function saveSettings() {
-  return new Promise((resolve) => {
-    chrome.runtime.sendMessage(
-      {
-        type: 'UPDATE_SETTINGS',
-        data: currentSettings
-      },
-      (response) => {
-        if (!response.success) {
-          console.error('保存设置失败:', response.error)
-        }
-        resolve()
-      }
-    )
-  })
-}
-
-/**
- * 绑定事件
- */
-function bindEvents() {
-  // 暗黑模式切换
-  elements.toggleDarkMode.addEventListener('click', async () => {
-    if (currentSettings && currentSettings.modules && currentSettings.modules.ui) {
-      currentSettings.modules.ui.darkMode = !currentSettings.modules.ui.darkMode
-      await saveSettings()
-      updateUI()
+  // 1. 尝试从 content script 获取实时模块列表
+  try {
+    const response = await sendMessage({ type: 'GET_MODULE_LIST' })
+    if (response?.success && !response.noTab) {
+      modules = response.data
+      connected = true
     }
-  })
+  } catch {
+    // 忽略
+  }
 
-  // 自动签到
-  elements.autoSign.addEventListener('click', async () => {
-    // 发送签到消息给 content script
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs[0] && tabs[0].url && tabs[0].url.includes('linux.do')) {
-        chrome.tabs.sendMessage(tabs[0].id, { type: 'AUTO_SIGN' })
-      }
-    })
-  })
+  // 2. 回退：从 storage 读取开关状态
+  if (!modules) {
+    const enabledMap = await getEnabledModules()
+    modules = DEFAULT_MODULES.map(m => ({
+      ...m,
+      enabled: enabledMap[m.id] !== false,
+    }))
 
-  // 打开设置
-  elements.openSettings.addEventListener('click', () => {
-    chrome.runtime.openOptionsPage()
-  })
-
-  // UI 模块开关
-  elements.moduleUI.addEventListener('change', async () => {
-    if (currentSettings && currentSettings.modules && currentSettings.modules.ui) {
-      currentSettings.modules.ui.enabled = elements.moduleUI.checked
-      await saveSettings()
-      updateUI()
+    try {
+      const tabs = await chrome.tabs.query({ url: 'https://linux.do/*' })
+      setStatus(tabs.length > 0 ? 'no-tab' : 'offline')
+    } catch {
+      setStatus('offline')
     }
-  })
+  } else {
+    setStatus('connected')
+  }
 
-  // Tools 模块开关
-  elements.moduleTools.addEventListener('change', async () => {
-    if (currentSettings && currentSettings.modules && currentSettings.modules.tools) {
-      currentSettings.modules.tools.enabled = elements.moduleTools.checked
-      await saveSettings()
-      updateUI()
-    }
-  })
-
-  // 报告问题
-  elements.reportIssue.addEventListener('click', (e) => {
-    e.preventDefault()
-    chrome.tabs.create({
-      url: 'https://github.com/Adsryen/LinuxdoToolkit/issues'
-    })
-  })
+  renderModules(modules, connected)
 }
 
-/**
- * 更新 UI
- */
-function updateUI() {
-  if (!currentSettings) {
+// ========== 渲染模块列表 ==========
+function renderModules(modules, connected) {
+  if (!modules?.length) {
+    moduleListEl.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">📦</div>
+        <p>暂无可用模块</p>
+      </div>`
     return
   }
 
-  // 更新模块开关状态
-  if (currentSettings.modules) {
-    if (currentSettings.modules.ui) {
-      elements.moduleUI.checked = currentSettings.modules.ui.enabled
-    }
-    if (currentSettings.modules.tools) {
-      elements.moduleTools.checked = currentSettings.modules.tools.enabled
+  // 按分类分组
+  const grouped = {}
+  for (const m of modules) {
+    const cat = m.category || 'other'
+    if (!grouped[cat]) grouped[cat] = []
+    grouped[cat].push(m)
+  }
+
+  let html = ''
+  const order = ['efficiency', 'preview', 'data', 'ui', 'other']
+
+  for (const cat of order) {
+    const items = grouped[cat]
+    if (!items?.length) continue
+
+    html += `<div class="module-list-header">${CATEGORY_NAMES[cat] || cat}</div>`
+    for (const m of items) {
+      html += `
+        <div class="module-item" data-id="${m.id}">
+          <div class="module-info">
+            <span class="module-icon">${m.icon}</span>
+            <div class="module-details">
+              <span class="module-name">${m.name}</span>
+              <span class="module-desc">${m.description}</span>
+            </div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" data-module-id="${m.id}" ${m.enabled ? 'checked' : ''}>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>`
     }
   }
 
-  // 更新暗黑模式按钮状态
-  const isDarkMode = currentSettings.modules?.ui?.darkMode || false
-  elements.toggleDarkMode.style.background = isDarkMode ? '#e6f7ff' : ''
-  elements.toggleDarkMode.querySelector('.icon').textContent = isDarkMode ? '☀️' : '🌙'
+  moduleListEl.innerHTML = html
+
+  // 绑定 toggle 事件
+  moduleListEl.querySelectorAll('input[type="checkbox"]').forEach(input => {
+    input.addEventListener('change', async (e) => {
+      const moduleId = e.target.dataset.moduleId
+      const enabled = e.target.checked
+      await toggleModule(moduleId, enabled)
+    })
+  })
 }
 
-// 初始化
-document.addEventListener('DOMContentLoaded', init)
+// ========== 切换模块 ==========
+async function toggleModule(moduleId, enabled) {
+  await setModuleEnabled(moduleId, enabled)
+  try {
+    await sendMessage({ type: enabled ? 'ENABLE_MODULE' : 'DISABLE_MODULE', moduleId })
+  } catch {
+    // content script 不在线，下次打开页面生效
+  }
+}
+
+// ========== 状态栏 ==========
+function setStatus(state) {
+  statusBar.className = 'status-bar'
+  switch (state) {
+    case 'connected':
+      statusText.textContent = '已连接 linux.do'
+      break
+    case 'no-tab':
+      statusBar.classList.add('no-tab')
+      statusText.textContent = '请先打开 linux.do'
+      break
+    case 'offline':
+      statusBar.classList.add('offline')
+      statusText.textContent = '未连接'
+      break
+  }
+}
+
+// ========== 工具函数 ==========
+function sendMessage(message) {
+  return new Promise((resolve, reject) => {
+    chrome.runtime.sendMessage(message, (response) => {
+      if (chrome.runtime.lastError) {
+        reject(new Error(chrome.runtime.lastError.message))
+      } else {
+        resolve(response)
+      }
+    })
+  })
+}
+
+async function getEnabledModules() {
+  return new Promise((resolve) => {
+    chrome.storage.local.get('toolkit.enabledModules', (result) => {
+      resolve(result['toolkit.enabledModules'] || {})
+    })
+  })
+}
+
+async function setModuleEnabled(moduleId, enabled) {
+  const current = await getEnabledModules()
+  current[moduleId] = enabled
+  return new Promise((resolve) => {
+    chrome.storage.local.set({ 'toolkit.enabledModules': current }, resolve)
+  })
+}
+
+function openOptions() {
+  chrome.runtime.openOptionsPage()
+}

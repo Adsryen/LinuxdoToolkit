@@ -3,241 +3,171 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LinuxdoToolkit - 设置</title>
+  <title>LinuxdoToolkit 设置</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="options-container">
-    <header class="options-header">
-      <div class="header-content">
-        <div class="logo">
-          <img src="../public/icons/icon48.png" alt="Logo" width="40" height="40">
-          <div class="logo-text">
-            <h1>LinuxdoToolkit</h1>
-            <p class="subtitle">扩展设置</p>
-          </div>
-        </div>
-        <div class="header-actions">
-          <button id="reset-settings" class="btn btn-secondary">重置设置</button>
-          <button id="save-settings" class="btn btn-primary">保存设置</button>
-        </div>
+  <div class="options-layout">
+    <!-- 左侧导航 -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <img src="../../public/icons/icon48.png" alt="Logo">
+        <h1>LinuxdoToolkit</h1>
       </div>
-    </header>
-
-    <main class="options-content">
-      <nav class="sidebar">
-        <ul class="nav-list">
-          <li class="nav-item active" data-tab="general">
-            <span class="nav-icon">⚙️</span>
-            <span class="nav-label">常规设置</span>
-          </li>
-          <li class="nav-item" data-tab="ui">
-            <span class="nav-icon">🎨</span>
-            <span class="nav-label">界面美化</span>
-          </li>
-          <li class="nav-item" data-tab="tools">
-            <span class="nav-icon">🔧</span>
-            <span class="nav-label">效率工具</span>
-          </li>
-          <li class="nav-item" data-tab="notifications">
-            <span class="nav-icon">🔔</span>
-            <span class="nav-label">消息通知</span>
-          </li>
-          <li class="nav-item" data-tab="shortcuts">
-            <span class="nav-icon">⌨️</span>
-            <span class="nav-label">快捷键</span>
-          </li>
-          <li class="nav-item" data-tab="about">
-            <span class="nav-icon">ℹ️</span>
-            <span class="nav-label">关于</span>
-          </li>
-        </ul>
+      <nav class="sidebar-nav" id="sidebar-nav">
+        <a class="nav-item active" data-section="modules">
+          <span class="nav-icon">📦</span>
+          <span class="nav-label">模块管理</span>
+        </a>
+        <a class="nav-item" data-section="global">
+          <span class="nav-icon">⚙️</span>
+          <span class="nav-label">全局设置</span>
+        </a>
+        <a class="nav-item" data-section="toolbar">
+          <span class="nav-icon">🔧</span>
+          <span class="nav-label">工具栏</span>
+        </a>
+        <a class="nav-item" data-section="backup">
+          <span class="nav-icon">💾</span>
+          <span class="nav-label">备份与恢复</span>
+        </a>
+        <a class="nav-item" data-section="about">
+          <span class="nav-icon">ℹ️</span>
+          <span class="nav-label">关于</span>
+        </a>
       </nav>
+    </aside>
 
-      <div class="content-area">
-        <!-- 常规设置 -->
-        <section id="tab-general" class="tab-content active">
-          <h2>常规设置</h2>
-          <div class="settings-group">
-            <h3>基本选项</h3>
-            <div class="setting-item">
-              <div class="setting-info">
-                <label class="setting-label">开机自启</label>
-                <p class="setting-description">浏览器启动时自动激活扩展</p>
-              </div>
-              <label class="switch">
-                <input type="checkbox" id="auto-start" checked>
-                <span class="slider"></span>
-              </label>
-            </div>
-            <div class="setting-item">
-              <div class="setting-info">
-                <label class="setting-label">调试模式</label>
-                <p class="setting-description">启用详细的日志输出</p>
-              </div>
-              <label class="switch">
-                <input type="checkbox" id="debug-mode">
-                <span class="slider"></span>
-              </label>
+    <!-- 右侧内容 -->
+    <main class="content">
+      <!-- 模块管理 -->
+      <section class="section active" id="section-modules">
+        <h2 class="section-title">模块管理</h2>
+        <p class="section-desc">启用或禁用各功能模块，点击模块卡片可查看详细设置。</p>
+        <div class="module-grid" id="module-grid">
+          <div class="loading">加载中...</div>
+        </div>
+      </section>
+
+      <!-- 全局设置 -->
+      <section class="section" id="section-global">
+        <h2 class="section-title">全局设置</h2>
+        <div class="form-group">
+          <label class="form-label">主题</label>
+          <select id="global-theme" class="form-select">
+            <option value="auto">跟随系统</option>
+            <option value="light">浅色</option>
+            <option value="dark">深色</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">语言</label>
+          <select id="global-language" class="form-select">
+            <option value="zh-CN">简体中文</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label checkbox-label">
+            <input type="checkbox" id="global-auto-backup" class="form-checkbox">
+            自动备份设置
+          </label>
+          <span class="form-hint">每次修改设置后自动保存快照（最多 5 份）</span>
+        </div>
+        <div class="form-actions">
+          <button id="btn-save-global" class="btn btn-primary">保存</button>
+        </div>
+      </section>
+
+      <!-- 工具栏设置 -->
+      <section class="section" id="section-toolbar">
+        <h2 class="section-title">工具栏设置</h2>
+        <div class="form-group">
+          <label class="form-label checkbox-label">
+            <input type="checkbox" id="toolbar-enabled" class="form-checkbox" checked>
+            显示浮动工具栏
+          </label>
+          <span class="form-hint">在 linux.do 页面显示浮动工具栏</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label checkbox-label">
+            <input type="checkbox" id="toolbar-collapsed" class="form-checkbox">
+            默认折叠
+          </label>
+          <span class="form-hint">工具栏初始状态为折叠</span>
+        </div>
+        <div class="form-actions">
+          <button id="btn-save-toolbar" class="btn btn-primary">保存</button>
+        </div>
+      </section>
+
+      <!-- 备份与恢复 -->
+      <section class="section" id="section-backup">
+        <h2 class="section-title">备份与恢复</h2>
+        <p class="section-desc">导出或导入扩展配置，换电脑时不会丢失数据。</p>
+
+        <div class="backup-grid">
+          <div class="backup-card">
+            <h3>📤 导出备份</h3>
+            <p>将所有配置导出为 JSON 文件</p>
+            <div class="backup-btns">
+              <button id="btn-export" class="btn btn-primary">导出到文件</button>
+              <button id="btn-export-clipboard" class="btn btn-secondary">复制到剪贴板</button>
             </div>
           </div>
-        </section>
 
-        <!-- 界面美化 -->
-        <section id="tab-ui" class="tab-content">
-          <h2>界面美化</h2>
-          <div class="settings-group">
-            <h3>主题设置</h3>
-            <div class="setting-item">
-              <div class="setting-info">
-                <label class="setting-label">暗黑模式</label>
-                <p class="setting-description">启用深色主题，保护眼睛</p>
-              </div>
-              <label class="switch">
-                <input type="checkbox" id="dark-mode">
-                <span class="slider"></span>
-              </label>
-            </div>
-            <div class="setting-item">
-              <div class="setting-info">
-                <label class="setting-label">自定义主题</label>
-                <p class="setting-description">选择预设主题或自定义颜色</p>
-              </div>
-              <select id="theme-select" class="select-input">
-                <option value="default">默认主题</option>
-                <option value="blue">蓝色主题</option>
-                <option value="green">绿色主题</option>
-                <option value="purple">紫色主题</option>
-              </select>
+          <div class="backup-card">
+            <h3>📥 导入恢复</h3>
+            <p>从 JSON 文件恢复配置</p>
+            <input type="file" id="import-file" accept=".json" hidden>
+            <div class="backup-btns">
+              <button id="btn-import" class="btn btn-primary">选择文件导入</button>
+              <button id="btn-import-clipboard" class="btn btn-secondary">从剪贴板粘贴</button>
             </div>
           </div>
-        </section>
+        </div>
 
-        <!-- 效率工具 -->
-        <section id="tab-tools" class="tab-content">
-          <h2>效率工具</h2>
-          <div class="settings-group">
-            <h3>自动化功能</h3>
-            <div class="setting-item">
-              <div class="setting-info">
-                <label class="setting-label">自动签到</label>
-                <p class="setting-description">每天自动完成签到任务</p>
-              </div>
-              <label class="switch">
-                <input type="checkbox" id="auto-sign">
-                <span class="slider"></span>
-              </label>
-            </div>
-            <div class="setting-item">
-              <div class="setting-info">
-                <label class="setting-label">快速回复</label>
-                <p class="setting-description">在输入框添加快捷回复按钮</p>
-              </div>
-              <label class="switch">
-                <input type="checkbox" id="quick-reply" checked>
-                <span class="slider"></span>
-              </label>
-            </div>
+        <div class="backup-card" style="margin-top: 16px;">
+          <h3>📸 自动快照</h3>
+          <p>最近的自动备份快照</p>
+          <div id="snapshot-list" class="snapshot-list">
+            <span class="text-muted">暂无快照</span>
           </div>
-        </section>
+        </div>
 
-        <!-- 消息通知 -->
-        <section id="tab-notifications" class="tab-content">
-          <h2>消息通知</h2>
-          <div class="settings-group">
-            <h3>通知设置</h3>
-            <div class="setting-item">
-              <div class="setting-info">
-                <label class="setting-label">桌面通知</label>
-                <p class="setting-description">接收系统桌面通知</p>
-              </div>
-              <label class="switch">
-                <input type="checkbox" id="desktop-notification" checked>
-                <span class="slider"></span>
-              </label>
-            </div>
-            <div class="setting-item">
-              <div class="setting-info">
-                <label class="setting-label">声音提醒</label>
-                <p class="setting-description">收到通知时播放提示音</p>
-              </div>
-              <label class="switch">
-                <input type="checkbox" id="sound-notification">
-                <span class="slider"></span>
-              </label>
-            </div>
+        <!-- 导入预览 -->
+        <div id="import-preview" class="import-preview" style="display:none;">
+          <h3>导入预览</h3>
+          <div id="diff-content"></div>
+          <div class="form-actions">
+            <button id="btn-import-overwrite" class="btn btn-danger">完全覆盖</button>
+            <button id="btn-import-merge" class="btn btn-primary">智能合并</button>
+            <button id="btn-import-cancel" class="btn btn-secondary">取消</button>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <!-- 快捷键 -->
-        <section id="tab-shortcuts" class="tab-content">
-          <h2>快捷键</h2>
-          <div class="settings-group">
-            <h3>自定义快捷键</h3>
-            <div class="setting-item">
-              <div class="setting-info">
-                <label class="setting-label">切换暗黑模式</label>
-                <p class="setting-description">快速切换暗黑模式</p>
-              </div>
-              <div class="shortcut-input">
-                <input type="text" value="Ctrl+Shift+D" readonly>
-                <button class="btn btn-small">修改</button>
-              </div>
-            </div>
-            <div class="setting-item">
-              <div class="setting-info">
-                <label class="setting-label">打开设置</label>
-                <p class="setting-description">快速打开扩展设置页面</p>
-              </div>
-              <div class="shortcut-input">
-                <input type="text" value="Ctrl+Shift+L" readonly>
-                <button class="btn btn-small">修改</button>
-              </div>
-            </div>
-            <div class="setting-item">
-              <div class="setting-info">
-                <label class="setting-label">快速回复</label>
-                <p class="setting-description">快速打开回复输入框</p>
-              </div>
-              <div class="shortcut-input">
-                <input type="text" value="Ctrl+Shift+R" readonly>
-                <button class="btn btn-small">修改</button>
-              </div>
-            </div>
+      <!-- 关于 -->
+      <section class="section" id="section-about">
+        <h2 class="section-title">关于</h2>
+        <div class="about-card">
+          <img src="../../public/icons/icon128.png" alt="Logo" class="about-logo">
+          <h3>LinuxdoToolkit</h3>
+          <p id="about-version" class="about-version">v1.0.0</p>
+          <p class="about-desc">将 Linux.do 社区的油猴脚本与单功能扩展融合为一站式浏览器扩展</p>
+          <div class="about-links">
+            <a href="https://github.com/Adsryen/LinuxdoToolkit" target="_blank" class="btn btn-secondary">GitHub</a>
+            <a href="https://github.com/Adsryen/LinuxdoToolkit/issues" target="_blank" class="btn btn-secondary">反馈问题</a>
+            <a href="https://linux.do" target="_blank" class="btn btn-secondary">Linux.do</a>
           </div>
-        </section>
-
-        <!-- 关于 -->
-        <section id="tab-about" class="tab-content">
-          <h2>关于</h2>
-          <div class="about-content">
-            <div class="about-logo">
-              <img src="../public/icons/icon128.png" alt="Logo" width="80" height="80">
-            </div>
-            <h3>LinuxdoToolkit</h3>
-            <p class="version">版本 1.0.0</p>
-            <p class="description">
-              将 Linux.do 社区的油猴脚本整合为一站式浏览器扩展
-            </p>
-            <div class="about-links">
-              <a href="https://github.com/Adsryen/LinuxdoToolkit" target="_blank" class="link">
-                GitHub 仓库
-              </a>
-              <a href="https://github.com/Adsryen/LinuxdoToolkit/issues" target="_blank" class="link">
-                问题反馈
-              </a>
-              <a href="https://linux.do" target="_blank" class="link">
-                Linux.do 社区
-              </a>
-            </div>
-            <p class="copyright">
-              © 2026 Adsryen. MIT License.
-            </p>
-          </div>
-        </section>
-      </div>
+          <p class="copyright">© 2026 Adsryen. MIT License.</p>
+        </div>
+      </section>
     </main>
   </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
 
   <script src="index.js" type="module"></script>
 </body>
