@@ -66,7 +66,7 @@ async function loadModules() {
     }))
 
     try {
-      const tabs = await chrome.tabs.query({ url: 'https://linux.do/*' })
+      const tabs = await chrome.tabs.query({ url: ['https://linux.do/*', 'https://www.linux.do/*'] })
       setStatus(tabs.length > 0 ? 'no-tab' : 'offline')
     } catch {
       setStatus('offline')
@@ -154,11 +154,11 @@ function setStatus(state) {
       break
     case 'no-tab':
       statusBar.classList.add('no-tab')
-      statusText.textContent = '请先打开 linux.do'
+      statusText.textContent = '页面未加载内容脚本'
       break
     case 'offline':
       statusBar.classList.add('offline')
-      statusText.textContent = '未连接'
+      statusText.textContent = '未找到 linux.do 标签页'
       break
   }
 }

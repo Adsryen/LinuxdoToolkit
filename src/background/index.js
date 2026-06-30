@@ -146,18 +146,26 @@ async function handleMessage(message, sender, sendResponse) {
  */
 async function forwardToContent(message, sendResponse) {
   try {
-    const tabs = await chrome.tabs.query({ url: 'https://linux.do/*' })
+    // 同时匹配 linux.do 和 www.linux.do
+    const tabs = await chrome.tabs.query({
+      url: ['https://linux.do/*', 'https://www.linux.do/*']
+    })
     if (tabs.length === 0) {
       sendResponse({ success: true, data: [], noTab: true })
       return
     }
-    chrome.tabs.sendMessage(tabs[0].id, message, (response) => {
-      if (chrome.runtime.lastError) {
-        sendResponse({ success: true, data: [], noTab: true })
-      } else {
+    // 尝试所有匹配的 tab，直到有一个成功
+    for (const tab of tabs) {
+      try {
+        const response = await chrome.tabs.sendMessage(tab.id, message)
         sendResponse(response || { success: true })
+        return
+      } catch (e) {
+        // 这个 tab 可能没有 content script，继续尝试下一个
+        continue
       }
-    })
+    }
+    sendResponse({ success: true, data: [], noTab: true })
   } catch (error) {
     sendResponse({ success: false, error: error.message })
   }

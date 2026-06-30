@@ -20,7 +20,7 @@ class LinuxdoToolkit {
   constructor() {
     this.moduleManager = new ModuleManager()
     this.toolbar = null
-    this.navigation = new Navigation()
+    this.navigation = Navigation
     this.initialized = false
   }
 
@@ -73,8 +73,7 @@ class LinuxdoToolkit {
    * 设置 SPA 导航监听
    */
   setupNavigation() {
-    this.navigation.start()
-    this.navigation.on((url, pageType) => {
+    Navigation.observe((url, pageType) => {
       console.log('[Navigation] 页面变化:', url, pageType)
       this.moduleManager.onPageChange(url)
     })

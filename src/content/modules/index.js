@@ -9,6 +9,13 @@ import { Module, getPageType } from './base.js'
 import { settings } from '../../utils/settings.js'
 import { emit, EVENTS } from '../../utils/events.js'
 
+// 静态导入所有模块（Vite 会打包进 content.js）
+import { CreditModule } from './credit/index.js'
+import { AutoBrowseModule } from './auto-browse/index.js'
+import { SideTopicModule } from './side-topic/index.js'
+import { PeekModule } from './peek/index.js'
+import { UIEnhanceModule } from './ui-enhance/index.js'
+
 export class ModuleManager {
   constructor() {
     /** @type {Map<string, Module>} */
@@ -27,8 +34,8 @@ export class ModuleManager {
     // 初始化 settings
     await settings.init()
 
-    // 等待所有内置模块注册完成
-    await this._registerBuiltInModules()
+    // 注册所有内置模块（同步）
+    this._registerBuiltInModules()
 
     // 只初始化已启用的模块（禁用的模块延迟初始化）
     const enabledMap = settings.getEnabledModules()
@@ -257,16 +264,14 @@ export class ModuleManager {
   // ========== 内部方法 ==========
 
   /**
-   * 注册内置模块（等待所有 import 完成）
+   * 注册内置模块
    */
-  async _registerBuiltInModules() {
-    await Promise.all([
-      import('./credit/index.js').then(({ CreditModule }) => this.register(CreditModule)),
-      import('./auto-browse/index.js').then(({ AutoBrowseModule }) => this.register(AutoBrowseModule)),
-      import('./side-topic/index.js').then(({ SideTopicModule }) => this.register(SideTopicModule)),
-      import('./peek/index.js').then(({ PeekModule }) => this.register(PeekModule)),
-      import('./ui-enhance/index.js').then(({ UIEnhanceModule }) => this.register(UIEnhanceModule)),
-    ])
+  _registerBuiltInModules() {
+    this.register(CreditModule)
+    this.register(AutoBrowseModule)
+    this.register(SideTopicModule)
+    this.register(PeekModule)
+    this.register(UIEnhanceModule)
   }
 }
 

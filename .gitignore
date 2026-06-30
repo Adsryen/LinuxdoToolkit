@@ -37,3 +37,8 @@ tmp/
 temp/
 *.tmp
 *.temp
+
+# ai
+.claude/
+.codex/
+.trae/

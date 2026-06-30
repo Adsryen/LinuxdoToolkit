@@ -7,6 +7,7 @@
 
 import { Module } from '../base.js'
 import { CreditWidget } from './widget.js'
+import { settings } from '../../../utils/settings.js'
 
 const REFRESH_INTERVAL = 5 * 60 * 1000  // 5 分钟
 
@@ -38,9 +39,7 @@ export class CreditModule extends Module {
       onPositionChange: (pos) => {
         this.settings.position = pos
         // 持久化位置
-        import('../../../utils/settings.js').then(({ settings: s }) => {
-          s.setModule(this.id, { position: pos })
-        })
+        settings.setModule(this.id, { position: pos })
       },
     })
 
