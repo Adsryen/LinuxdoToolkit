@@ -6,7 +6,7 @@
  */
 
 import { Module } from '../base.js'
-import { settings } from '../../utils/settings.js'
+import { settings } from '../../../utils/settings.js'
 import { SidePanel } from './panel.js'
 import { TopicStore } from './topics.js'
 

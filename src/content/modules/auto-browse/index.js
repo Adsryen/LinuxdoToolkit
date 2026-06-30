@@ -6,7 +6,7 @@
  */
 
 import { Module, getPageType } from '../base.js'
-import { settings } from '../../utils/settings.js'
+import { settings } from '../../../utils/settings.js'
 import { ScrollController } from './scroll.js'
 import { LikeSystem } from './like.js'
 import { BrowseEngine } from './browser.js'

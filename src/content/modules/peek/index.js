@@ -11,7 +11,7 @@
  */
 
 import { Module, getPageType } from '../base.js'
-import { settings } from '../../utils/settings.js'
+import { settings } from '../../../utils/settings.js'
 import { PeekButton } from './button.js'
 import { PeekDrawer } from './drawer.js'
 import { TopicCache } from './cache.js'

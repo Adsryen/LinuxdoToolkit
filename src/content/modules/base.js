@@ -17,8 +17,8 @@
  *     })
  *   }
  *
- *   async onInit() { /* 初始化逻辑 */ }
- *   onDestroy() { /* 清理逻辑 */ }
+ *   async onInit() { ... }
+ *   onDestroy() { ... }
  * }
  */
 export class Module {

@@ -38,7 +38,7 @@ export class CreditModule extends Module {
       onPositionChange: (pos) => {
         this.settings.position = pos
         // 持久化位置
-        import('../../utils/settings.js').then(({ settings: s }) => {
+        import('../../../utils/settings.js').then(({ settings: s }) => {
           s.setModule(this.id, { position: pos })
         })
       },

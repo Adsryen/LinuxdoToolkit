@@ -6,8 +6,8 @@
  */
 
 import { Module } from '../base.js'
-import { settings } from '../../utils/settings.js'
-import { Theme } from '../../utils/theme.js'
+import { settings } from '../../../utils/settings.js'
+import { Theme } from '../../../utils/theme.js'
 
 const THEMES = {
   auto:   { name: '跟随系统', icon: '💻' },
