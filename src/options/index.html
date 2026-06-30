@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LinuxdoToolkit - 设置</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="options-container">
+    <header class="options-header">
+      <div class="header-content">
+        <div class="logo">
+          <img src="../public/icons/icon48.png" alt="Logo" width="40" height="40">
+          <div class="logo-text">
+            <h1>LinuxdoToolkit</h1>
+            <p class="subtitle">扩展设置</p>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button id="reset-settings" class="btn btn-secondary">重置设置</button>
+          <button id="save-settings" class="btn btn-primary">保存设置</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="options-content">
+      <nav class="sidebar">
+        <ul class="nav-list">
+          <li class="nav-item active" data-tab="general">
+            <span class="nav-icon">⚙️</span>
+            <span class="nav-label">常规设置</span>
+          </li>
+          <li class="nav-item" data-tab="ui">
+            <span class="nav-icon">🎨</span>
+            <span class="nav-label">界面美化</span>
+          </li>
+          <li class="nav-item" data-tab="tools">
+            <span class="nav-icon">🔧</span>
+            <span class="nav-label">效率工具</span>
+          </li>
+          <li class="nav-item" data-tab="notifications">
+            <span class="nav-icon">🔔</span>
+            <span class="nav-label">消息通知</span>
+          </li>
+          <li class="nav-item" data-tab="shortcuts">
+            <span class="nav-icon">⌨️</span>
+            <span class="nav-label">快捷键</span>
+          </li>
+          <li class="nav-item" data-tab="about">
+            <span class="nav-icon">ℹ️</span>
+            <span class="nav-label">关于</span>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="content-area">
+        <!-- 常规设置 -->
+        <section id="tab-general" class="tab-content active">
+          <h2>常规设置</h2>
+          <div class="settings-group">
+            <h3>基本选项</h3>
+            <div class="setting-item">
+              <div class="setting-info">
+                <label class="setting-label">开机自启</label>
+                <p class="setting-description">浏览器启动时自动激活扩展</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="auto-start" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="setting-item">
+              <div class="setting-info">
+                <label class="setting-label">调试模式</label>
+                <p class="setting-description">启用详细的日志输出</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="debug-mode">
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <!-- 界面美化 -->
+        <section id="tab-ui" class="tab-content">
+          <h2>界面美化</h2>
+          <div class="settings-group">
+            <h3>主题设置</h3>
+            <div class="setting-item">
+              <div class="setting-info">
+                <label class="setting-label">暗黑模式</label>
+                <p class="setting-description">启用深色主题，保护眼睛</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="dark-mode">
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="setting-item">
+              <div class="setting-info">
+                <label class="setting-label">自定义主题</label>
+                <p class="setting-description">选择预设主题或自定义颜色</p>
+              </div>
+              <select id="theme-select" class="select-input">
+                <option value="default">默认主题</option>
+                <option value="blue">蓝色主题</option>
+                <option value="green">绿色主题</option>
+                <option value="purple">紫色主题</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <!-- 效率工具 -->
+        <section id="tab-tools" class="tab-content">
+          <h2>效率工具</h2>
+          <div class="settings-group">
+            <h3>自动化功能</h3>
+            <div class="setting-item">
+              <div class="setting-info">
+                <label class="setting-label">自动签到</label>
+                <p class="setting-description">每天自动完成签到任务</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="auto-sign">
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="setting-item">
+              <div class="setting-info">
+                <label class="setting-label">快速回复</label>
+                <p class="setting-description">在输入框添加快捷回复按钮</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="quick-reply" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <!-- 消息通知 -->
+        <section id="tab-notifications" class="tab-content">
+          <h2>消息通知</h2>
+          <div class="settings-group">
+            <h3>通知设置</h3>
+            <div class="setting-item">
+              <div class="setting-info">
+                <label class="setting-label">桌面通知</label>
+                <p class="setting-description">接收系统桌面通知</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="desktop-notification" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="setting-item">
+              <div class="setting-info">
+                <label class="setting-label">声音提醒</label>
+                <p class="setting-description">收到通知时播放提示音</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="sound-notification">
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <!-- 快捷键 -->
+        <section id="tab-shortcuts" class="tab-content">
+          <h2>快捷键</h2>
+          <div class="settings-group">
+            <h3>自定义快捷键</h3>
+            <div class="setting-item">
+              <div class="setting-info">
+                <label class="setting-label">切换暗黑模式</label>
+                <p class="setting-description">快速切换暗黑模式</p>
+              </div>
+              <div class="shortcut-input">
+                <input type="text" value="Ctrl+Shift+D" readonly>
+                <button class="btn btn-small">修改</button>
+              </div>
+            </div>
+            <div class="setting-item">
+              <div class="setting-info">
+                <label class="setting-label">打开设置</label>
+                <p class="setting-description">快速打开扩展设置页面</p>
+              </div>
+              <div class="shortcut-input">
+                <input type="text" value="Ctrl+Shift+L" readonly>
+                <button class="btn btn-small">修改</button>
+              </div>
+            </div>
+            <div class="setting-item">
+              <div class="setting-info">
+                <label class="setting-label">快速回复</label>
+                <p class="setting-description">快速打开回复输入框</p>
+              </div>
+              <div class="shortcut-input">
+                <input type="text" value="Ctrl+Shift+R" readonly>
+                <button class="btn btn-small">修改</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 关于 -->
+        <section id="tab-about" class="tab-content">
+          <h2>关于</h2>
+          <div class="about-content">
+            <div class="about-logo">
+              <img src="../public/icons/icon128.png" alt="Logo" width="80" height="80">
+            </div>
+            <h3>LinuxdoToolkit</h3>
+            <p class="version">版本 1.0.0</p>
+            <p class="description">
+              将 Linux.do 社区的油猴脚本整合为一站式浏览器扩展
+            </p>
+            <div class="about-links">
+              <a href="https://github.com/Adsryen/LinuxdoToolkit" target="_blank" class="link">
+                GitHub 仓库
+              </a>
+              <a href="https://github.com/Adsryen/LinuxdoToolkit/issues" target="_blank" class="link">
+                问题反馈
+              </a>
+              <a href="https://linux.do" target="_blank" class="link">
+                Linux.do 社区
+              </a>
+            </div>
+            <p class="copyright">
+              © 2026 Adsryen. MIT License.
+            </p>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script src="index.js" type="module"></script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  # 构建并发布
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build extension
+        run: npm run build
+
+      - name: Create ZIP for Chrome
+        run: |
+          cd dist
+          zip -r ../linuxdo-toolkit-chrome.zip .
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            linuxdo-toolkit-chrome.zip
+          generate_release_notes: true
+          draft: false
+          prerelease: ${{ contains(github.ref, 'beta') || contains(github.ref, 'alpha') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload to Chrome Web Store (placeholder)
+        run: |
+          echo "TODO: Upload to Chrome Web Store"
+          echo "This step will be implemented when ready to publish"
+        # env:
+        #   CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
+        #   CLIENT_ID: ${{ secrets.CLIENT_ID }}
+        #   CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+        #   REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN }}

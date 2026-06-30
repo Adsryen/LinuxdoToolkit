@@ -1,0 +1,82 @@
+{
+  "manifest_version": 3,
+  "name": "LinuxdoToolkit",
+  "description": "将 Linux.do 社区的油猴脚本整合为一站式浏览器扩展",
+  "version": "1.0.0",
+  "author": "Adsryen",
+  "homepage_url": "https://github.com/Adsryen/LinuxdoToolkit",
+
+  "icons": {
+    "16": "public/icons/icon16.png",
+    "32": "public/icons/icon32.png",
+    "48": "public/icons/icon48.png",
+    "128": "public/icons/icon128.png"
+  },
+
+  "action": {
+    "default_popup": "src/popup/index.html",
+    "default_icon": {
+      "16": "public/icons/icon16.png",
+      "32": "public/icons/icon32.png"
+    },
+    "default_title": "LinuxdoToolkit"
+  },
+
+  "background": {
+    "service_worker": "src/background/index.js",
+    "type": "module"
+  },
+
+  "content_scripts": [
+    {
+      "matches": [
+        "https://linux.do/*",
+        "https://www.linux.do/*"
+      ],
+      "js": ["src/content/index.js"],
+      "css": ["src/styles/content.css"],
+      "run_at": "document_end"
+    }
+  ],
+
+  "permissions": [
+    "storage",
+    "activeTab",
+    "notifications"
+  ],
+
+  "host_permissions": [
+    "https://linux.do/*",
+    "https://www.linux.do/*"
+  ],
+
+  "options_page": "src/options/index.html",
+
+  "web_accessible_resources": [
+    {
+      "resources": ["public/icons/*", "src/styles/*"],
+      "matches": ["https://linux.do/*", "https://www.linux.do/*"]
+    }
+  ],
+
+  "commands": {
+    "toggle-dark-mode": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+D",
+        "mac": "Command+Shift+D"
+      },
+      "description": "切换暗黑模式"
+    },
+    "open-settings": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+L",
+        "mac": "Command+Shift+L"
+      },
+      "description": "打开扩展设置"
+    }
+  },
+
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
+}
