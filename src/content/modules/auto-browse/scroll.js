@@ -1,9 +1,12 @@
 /**
- * 滚动控制器
+ * 滚动控制器（基于 ryen.js 的仿真人滚动）
  *
- * 合并两个脚本的滚动逻辑：
- * - 基础滚动（来自 automation）：固定步长 + 间隔
- * - 仿真人滚动（来自 ryen.js）：wheel burst + micro pause + dwell
+ * 核心特性：
+ * - wheel burst：模拟鼠标滚轮，多步小幅度滚动
+ * - 微停顿：burst 后随机暂停
+ * - 长休息：偶发长时间暂停
+ * - 内容驻留：在可读元素上停顿
+ * - 上划回看：偶尔回滚
  */
 
 const random = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min
@@ -12,20 +15,103 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms))
 export class ScrollController {
   constructor(config = {}) {
     this.config = config
-    this.running = false
-    this.lastScrollHeight = 0
-    this.noNewContentCount = 0
+    this._lastScrollHeight = 0
+    this._noNewCount = 0
   }
 
   updateConfig(config) {
     this.config = config
   }
 
-  // ========== 基础滚动 ==========
+  // ========== 核心滚动 ==========
 
-  scrollDown() {
-    const step = this.config.scrollStep + random(-30, 30)
-    window.scrollBy({ top: step, behavior: 'auto' })
+  /**
+   * 模拟一次鼠标滚轮"突发"（核心方法）
+   * 一次 burst 包含 3~8 步，每步 12~45px，间隔 14~28ms
+   */
+  async wheelBurst(direction = 1) {
+    const steps = random(this.config.wheelBurstMin || 3, this.config.wheelBurstMax || 8)
+    for (let i = 0; i < steps; i++) {
+      const step = random(this.config.wheelStepMin || 12, this.config.wheelStepMax || 45)
+      const jitter = random(-2, 3)
+      window.scrollBy({ top: direction * (step + jitter) })
+      const interval = random(this.config.wheelIntervalMin || 14, this.config.wheelIntervalMax || 28)
+      await sleep(interval)
+    }
+  }
+
+  // ========== 行为模拟 ==========
+
+  /**
+   * 微停顿：35% 概率，250~1100ms
+   */
+  async maybeMicroPause() {
+    if (Math.random() < (this.config.microPauseChance ?? 0.35)) {
+      await sleep(random(this.config.microPauseMin || 250, this.config.microPauseMax || 1100))
+    }
+  }
+
+  /**
+   * 长休息：3% 概率，2500~7000ms
+   */
+  async maybeLongRest() {
+    if (Math.random() < (this.config.longRestChance ?? 0.03)) {
+      await sleep(random(this.config.longRestMin || 2500, this.config.longRestMax || 7000))
+    }
+  }
+
+  /**
+   * 上划回看：偶尔回滚一小段
+   */
+  async maybeUpScroll() {
+    if (Math.random() < (this.config.upScrollChance ?? 0)) {
+      const amount = random(this.config.upScrollMin || 20, this.config.upScrollMax || 90)
+      window.scrollBy({ top: -amount })
+      await sleep(random(80, 160))
+    }
+  }
+
+  /**
+   * 内容驻留：在可读元素上停留
+   */
+  async maybeDwell() {
+    if (Math.random() < 0.25) {
+      const el = this._findReadableNearCenter()
+      if (el) {
+        await sleep(random(this.config.dwellMin || 800, this.config.dwellMax || 2000))
+      }
+    }
+  }
+
+  // ========== 位置检测 ==========
+
+  isAtBottom() {
+    const h = document.documentElement
+    return h.scrollTop + h.clientHeight >= h.scrollHeight - 200
+  }
+
+  isAtTop() {
+    return document.documentElement.scrollTop < 100
+  }
+
+  hasNewContent() {
+    const current = document.documentElement.scrollHeight
+    if (current > this._lastScrollHeight) {
+      this._lastScrollHeight = current
+      this._noNewCount = 0
+      return true
+    }
+    this._noNewCount++
+    return false
+  }
+
+  isContentFullyLoaded() {
+    return this._noNewCount >= (this.config.retry || 3)
+  }
+
+  reset() {
+    this._lastScrollHeight = document.documentElement.scrollHeight
+    this._noNewCount = 0
   }
 
   async scrollToTop() {
@@ -33,82 +119,31 @@ export class ScrollController {
     await sleep(random(200, 400))
   }
 
-  isAtBottom() {
-    const { scrollTop, scrollHeight, clientHeight } = this._getScrollInfo()
-    return scrollTop + clientHeight >= scrollHeight - 100
-  }
-
-  isAtTop() {
-    return this._getScrollInfo().scrollTop < 100
-  }
-
-  hasNewContent() {
-    const current = document.documentElement.scrollHeight
-    if (current > this.lastScrollHeight) {
-      this.lastScrollHeight = current
-      this.noNewContentCount = 0
-      return true
-    }
-    this.noNewContentCount++
-    return false
-  }
-
-  isContentFullyLoaded() {
-    return this.noNewContentCount >= (this.config.retry || 3)
-  }
-
-  reset() {
-    this.lastScrollHeight = document.documentElement.scrollHeight
-    this.noNewContentCount = 0
-  }
-
-  // ========== 仿真人滚动（ryen.js 风格） ==========
-
-  /**
-   * 模拟鼠标滚轮：一次 burst 包含多个步进，步进间有微小延迟
-   */
-  async humanScroll() {
-    const burstCount = random(3, 8)
-    for (let i = 0; i < burstCount; i++) {
-      const step = random(12, 45)
-      window.scrollBy({ top: step, behavior: 'auto' })
-      await sleep(random(14, 28))
-    }
-
-    // 微停顿
-    if (Math.random() < 0.35) {
-      await sleep(random(250, 1100))
-    }
-
-    // 偶发长休息
-    if (Math.random() < 0.03) {
-      await sleep(random(2500, 7000))
-    }
-  }
-
-  /**
-   * 在特定元素上停留（模拟阅读）
-   */
-  async dwellOnContent() {
-    const selectors = 'h1, h2, h3, h4, h5, h6, img, pre, code, blockquote, .onebox, .lightbox'
-    const elements = document.querySelectorAll(selectors)
-
-    for (const el of elements) {
-      const rect = el.getBoundingClientRect()
-      if (rect.top > 0 && rect.top < window.innerHeight * 0.6) {
-        await sleep(random(800, 2000))
-        break
-      }
-    }
-  }
-
   // ========== 内部 ==========
 
-  _getScrollInfo() {
-    return {
-      scrollTop: window.pageYOffset || document.documentElement.scrollTop,
-      scrollHeight: document.documentElement.scrollHeight,
-      clientHeight: document.documentElement.clientHeight,
+  _findReadableNearCenter() {
+    const selectors = 'h1, h2, h3, h4, h5, h6, img, pre, code, blockquote, .onebox, .lightbox'
+    const nodes = Array.from(document.querySelectorAll(selectors))
+    if (!nodes.length) return null
+
+    const vh = window.innerHeight
+    const centerY = vh / 2
+    let best = null
+    let bestScore = Infinity
+
+    for (const n of nodes) {
+      const r = n.getBoundingClientRect()
+      if (r.width < 20 || r.height < 16) continue
+      if (r.bottom < 0 || r.top > vh) continue
+
+      const elCY = r.top + r.height / 2
+      const score = Math.abs(elCY - centerY)
+      if (score < bestScore) {
+        bestScore = score
+        best = n
+      }
     }
+
+    return best && bestScore < 180 ? best : null
   }
 }

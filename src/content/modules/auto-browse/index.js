@@ -7,16 +7,17 @@
 
 import { Module, getPageType } from '../base.js'
 import { settings } from '../../../utils/settings.js'
+import { history } from '../../../utils/history.js'
 import { ScrollController } from './scroll.js'
 import { LikeSystem } from './like.js'
 import { BrowseEngine } from './browser.js'
 import { ControlPanel } from './panel.js'
 
 const SPEED_PRESETS = {
-  slow:   { name: '慢速', scrollStep: 300, scrollInterval: 2500, loadWait: 4000, readMin: 2000, readMax: 4000, retry: 4 },
-  normal: { name: '正常', scrollStep: 400, scrollInterval: 1500, loadWait: 2500, readMin: 800,  readMax: 1500, retry: 3 },
-  fast:   { name: '快速', scrollStep: 500, scrollInterval: 800,  loadWait: 1500, readMin: 300,  readMax: 800,  retry: 3 },
-  turbo:  { name: '极速', scrollStep: 600, scrollInterval: 400,  loadWait: 1000, readMin: 100,  readMax: 300,  retry: 2 },
+  slow:   { name: '慢速', wheelBurstMin: 2, wheelBurstMax: 5, wheelStepMin: 10, wheelStepMax: 28, wheelIntervalMin: 18, wheelIntervalMax: 35, microPauseChance: 0.45, microPauseMin: 400, microPauseMax: 1500, longRestChance: 0.04, longRestMin: 3000, longRestMax: 8000, dwellMin: 1000, dwellMax: 2500, upScrollChance: 0.05, upScrollMin: 15, upScrollMax: 60, retry: 4 },
+  normal: { name: '正常', wheelBurstMin: 3, wheelBurstMax: 8, wheelStepMin: 12, wheelStepMax: 45, wheelIntervalMin: 14, wheelIntervalMax: 28, microPauseChance: 0.35, microPauseMin: 250, microPauseMax: 1100, longRestChance: 0.03, longRestMin: 2500, longRestMax: 7000, dwellMin: 800,  dwellMax: 2000, upScrollChance: 0,    upScrollMin: 20,  upScrollMax: 90,  retry: 3 },
+  fast:   { name: '快速', wheelBurstMin: 4, wheelBurstMax: 10, wheelStepMin: 20, wheelStepMax: 55, wheelIntervalMin: 10, wheelIntervalMax: 22, microPauseChance: 0.25, microPauseMin: 150, microPauseMax: 600,  longRestChance: 0.02, longRestMin: 1500, longRestMax: 4000, dwellMin: 400,  dwellMax: 1000, upScrollChance: 0,    upScrollMin: 10,  upScrollMax: 50,  retry: 2 },
+  turbo:  { name: '极速', wheelBurstMin: 5, wheelBurstMax: 12, wheelStepMin: 30, wheelStepMax: 70, wheelIntervalMin: 8,  wheelIntervalMax: 16, microPauseChance: 0.15, microPauseMin: 100, microPauseMax: 300,  longRestChance: 0.01, longRestMin: 1000, longRestMax: 2000, dwellMin: 100,  dwellMax: 500,  upScrollChance: 0,    upScrollMin: 10,  upScrollMax: 30,  retry: 2 },
 }
 
 const LIST_OPTIONS = {
@@ -41,6 +42,7 @@ export class AutoBrowseModule extends Module {
         maxSessionViews: 50,
         maxSessionLikes: 50,
         autoResume: false,
+        readAll: false,       // 看完所有帖子，不跳过已浏览
       },
     })
 
@@ -55,6 +57,7 @@ export class AutoBrowseModule extends Module {
   }
 
   async onInit(s) {
+    await history.init()
     this.scroll = new ScrollController(SPEED_PRESETS[s.speed] || SPEED_PRESETS.normal)
     this.liker = new LikeSystem({
       enabled: s.enableLike,
@@ -64,6 +67,7 @@ export class AutoBrowseModule extends Module {
       listPath: LIST_OPTIONS[s.listType]?.path || '/latest',
       maxViews: s.maxSessionViews,
       maxLikes: s.maxSessionLikes,
+      readAll: s.readAll,
       onStats: (stats) => this._onStats(stats),
     })
 
@@ -73,12 +77,14 @@ export class AutoBrowseModule extends Module {
       listType: s.listType,
       enableLike: s.enableLike,
       likeChance: s.likeChance,
+      readAll: s.readAll,
       onStart: () => this.start(),
       onStop: () => this.stop(),
       onSpeedChange: (v) => this._setSpeed(v),
       onListChange: (v) => this._setList(v),
       onLikeToggle: (v) => this._setLike(v),
       onLikeChanceChange: (v) => this._setLikeChance(v),
+      onReadAllToggle: (v) => this._setReadAll(v),
       onClearHistory: () => this.engine?.clearHistory(),
     })
     this.panel.mount()
@@ -128,6 +134,7 @@ export class AutoBrowseModule extends Module {
         { key: 'maxSessionViews', label: '单次最大浏览', type: 'number', default: 50 },
         { key: 'maxSessionLikes', label: '单次最大点赞', type: 'number', default: 50 },
         { key: 'autoResume',   label: '自动恢复运行', type: 'toggle', default: false },
+        { key: 'readAll',      label: '看完所有帖子',  type: 'toggle', default: false, description: '不跳过已浏览的帖子，从头看到尾' },
       ],
     }
   }
@@ -185,6 +192,12 @@ export class AutoBrowseModule extends Module {
     this.settings.likeChance = v
     this.liker?.setChance(v)
     settings.setModule(this.id, { likeChance: v })
+  }
+
+  _setReadAll(v) {
+    this.settings.readAll = v
+    this.engine?.setReadAll(v)
+    settings.setModule(this.id, { readAll: v })
   }
 
   _startStuckDetection() {

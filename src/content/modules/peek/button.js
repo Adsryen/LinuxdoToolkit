@@ -94,9 +94,9 @@ export class PeekButton {
       #ltk-peek-btn button {
         width: 26px;
         height: 26px;
-        border: 1px solid var(--peek-border, #e5e7eb);
+        border: 1px solid var(--ltk-border, #e5e7eb);
         border-radius: 6px;
-        background: var(--peek-bg, #fff);
+        background: var(--ltk-bg, #fff);
         cursor: pointer;
         font-size: 13px;
         display: flex;
@@ -107,16 +107,11 @@ export class PeekButton {
         transition: all .15s;
       }
       #ltk-peek-btn button:hover {
-        background: var(--peek-primary, #3b82f6);
+        background: var(--ltk-primary, #3b82f6);
         color: #fff;
-        border-color: var(--peek-primary, #3b82f6);
+        border-color: var(--ltk-primary, #3b82f6);
       }
-      .dark #ltk-peek-btn button,
-      [data-theme="dark"] #ltk-peek-btn button {
-        --peek-bg: #1f2937;
-        --peek-border: #374151;
-      }
-    `
+      `
     document.head.appendChild(style)
   }
 }

@@ -268,7 +268,7 @@ export class PeekDrawer {
         position: fixed;
         top: 0; right: 0; bottom: 0;
         z-index: ${Z_INDEX.modal + 1};
-        background: var(--peek-bg, #fff);
+        background: var(--ltk-bg, #fff);
         box-shadow: -4px 0 20px rgba(0,0,0,.15);
         display: flex; flex-direction: column;
         transform: translateX(100%);
@@ -278,8 +278,8 @@ export class PeekDrawer {
       .peek-header {
         display: flex; align-items: center; justify-content: space-between;
         padding: 10px 14px;
-        background: var(--peek-header-bg, #f8f9fa);
-        border-bottom: 1px solid var(--peek-border, #e5e7eb);
+        background: var(--ltk-header-bg, #f8f9fa);
+        border-bottom: 1px solid var(--ltk-border, #e5e7eb);
         flex-shrink: 0;
       }
       .peek-title-area {
@@ -288,7 +288,7 @@ export class PeekDrawer {
       }
       .peek-mode-badge {
         font-size: 10px; padding: 2px 6px;
-        background: var(--peek-primary, #3b82f6);
+        background: var(--ltk-primary, #3b82f6);
         color: #fff; border-radius: 4px;
         flex-shrink: 0;
       }
@@ -306,7 +306,7 @@ export class PeekDrawer {
         border-radius: 6px;
         display: flex; align-items: center; justify-content: center;
       }
-      .peek-btn:hover { background: var(--peek-hover, #f0f1f3); }
+      .peek-btn:hover { background: var(--ltk-hover, #f0f1f3); }
       .peek-body {
         flex: 1; overflow-y: auto; padding: 14px;
       }
@@ -315,13 +315,13 @@ export class PeekDrawer {
       }
       .peek-footer {
         padding: 6px 14px;
-        border-top: 1px solid var(--peek-border, #e5e7eb);
-        font-size: 11px; color: var(--peek-text-muted, #9ca3af);
+        border-top: 1px solid var(--ltk-border, #e5e7eb);
+        font-size: 11px; color: var(--ltk-text-muted, #9ca3af);
         flex-shrink: 0;
       }
       .peek-loading, .peek-error {
         text-align: center; padding: 32px;
-        color: var(--peek-text-muted, #9ca3af);
+        color: var(--ltk-text-muted, #9ca3af);
         font-size: 13px;
       }
       .peek-error { color: #ef4444; }
@@ -331,48 +331,37 @@ export class PeekDrawer {
       }
       .peek-topic-meta {
         display: flex; gap: 12px; font-size: 12px;
-        color: var(--peek-text-muted, #9ca3af); margin-bottom: 8px;
+        color: var(--ltk-text-muted, #9ca3af); margin-bottom: 8px;
       }
       .peek-category {
-        font-size: 11px; background: var(--peek-hover, #f0f1f3);
+        font-size: 11px; background: var(--ltk-hover, #f0f1f3);
         padding: 2px 8px; border-radius: 4px;
-        color: var(--peek-text-secondary, #6b7280);
+        color: var(--ltk-text-secondary, #6b7280);
         display: inline-block; margin-bottom: 8px;
       }
       .peek-posters {
         display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px;
       }
       .peek-poster {
-        font-size: 11px; background: var(--peek-primary-light, #eff6ff);
-        color: var(--peek-primary, #3b82f6);
+        font-size: 11px; background: var(--ltk-primary-light, #eff6ff);
+        color: var(--ltk-primary, #3b82f6);
         padding: 2px 8px; border-radius: 10px;
       }
       .peek-divider {
-        border: none; border-top: 1px solid var(--peek-border, #e5e7eb);
+        border: none; border-top: 1px solid var(--ltk-border, #e5e7eb);
         margin: 12px 0;
       }
       .peek-stream-placeholder {
         text-align: center; padding: 20px;
-        color: var(--peek-text-muted, #9ca3af); font-size: 13px;
+        color: var(--ltk-text-muted, #9ca3af); font-size: 13px;
       }
       .peek-stream-placeholder .peek-btn {
         width: auto; height: auto; padding: 6px 14px;
-        background: var(--peek-primary, #3b82f6);
+        background: var(--ltk-primary, #3b82f6);
         color: #fff; border-radius: 6px; font-size: 12px;
         margin-top: 8px; display: inline-flex;
       }
-      .dark .peek-drawer,
-      [data-theme="dark"] .peek-drawer {
-        --peek-bg: #1a1a2e;
-        --peek-header-bg: #16162a;
-        --peek-border: #2d2d4a;
-        --peek-text-secondary: #94a3b8;
-        --peek-text-muted: #64748b;
-        --peek-hover: #222240;
-        --peek-primary: #3b82f6;
-        --peek-primary-light: #1e2a4a;
-      }
-    `
+      `
     document.head.appendChild(style)
   }
 }

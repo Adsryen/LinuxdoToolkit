@@ -103,10 +103,10 @@ export class CreditWidget {
     style.textContent = `
       #${WIDGET_ID} {
         position: fixed;
-        background: var(--ldc-bg, #ffffff);
-        border: 1px solid var(--ldc-border, #e5e7eb);
+        background: var(--ltk-bg, #ffffff);
+        border: 1px solid var(--ltk-border, #e5e7eb);
         border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,.04);
+        box-shadow: var(--ltk-shadow, 0 2px 4px rgba(0,0,0,.04));
         z-index: ${Z_INDEX.widget};
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         padding: 8px 12px;
@@ -115,11 +115,12 @@ export class CreditWidget {
         cursor: move;
         user-select: none;
         transition: .3s;
+        color: var(--ltk-text, #1a1a2e);
       }
-      #${WIDGET_ID}.ldc-loading { color: var(--ldc-text-secondary, #6b7280); }
+      #${WIDGET_ID}.ldc-loading { color: var(--ltk-text-secondary, #6b7280); }
       #${WIDGET_ID}.ldc-positive { color: #10b981; }
       #${WIDGET_ID}.ldc-negative { color: #ef4444; }
-      #${WIDGET_ID}.ldc-neutral { color: var(--ldc-text-secondary, #6b7280); }
+      #${WIDGET_ID}.ldc-neutral { color: var(--ltk-text-secondary, #6b7280); }
 
       #${TOOLTIP_ID} {
         position: fixed;
@@ -136,15 +137,7 @@ export class CreditWidget {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       }
 
-      /* Dark mode */
-      .dark #${WIDGET_ID},
-      [data-theme="dark"] #${WIDGET_ID} {
-        --ldc-bg: #1f2937;
-        --ldc-border: rgba(255,255,255,.1);
-        --ldc-text-secondary: #94a3b8;
-      }
-      .dark #${TOOLTIP_ID},
-      [data-theme="dark"] #${TOOLTIP_ID} {
+      html.ltk-dark #${TOOLTIP_ID} {
         background: rgba(255,255,255,.9);
         color: #000;
       }

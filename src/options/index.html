@@ -19,6 +19,10 @@
           <span class="nav-icon">📦</span>
           <span class="nav-label">模块管理</span>
         </a>
+        <a class="nav-item" data-section="dashboard">
+          <span class="nav-icon">📊</span>
+          <span class="nav-label">仪表盘</span>
+        </a>
         <a class="nav-item" data-section="global">
           <span class="nav-icon">⚙️</span>
           <span class="nav-label">全局设置</span>
@@ -46,6 +50,52 @@
         <p class="section-desc">启用或禁用各功能模块，点击模块卡片可查看详细设置。</p>
         <div class="module-grid" id="module-grid">
           <div class="loading">加载中...</div>
+        </div>
+      </section>
+
+      <!-- 仪表盘 -->
+      <section class="section" id="section-dashboard">
+        <h2 class="section-title">浏览仪表盘</h2>
+        <p class="section-desc">浏览历史数据基座，记录所有浏览过的帖子和楼层。</p>
+
+        <div class="dash-stats" id="dash-stats">
+          <div class="dash-stat-card">
+            <span class="dash-stat-num" id="dash-total-views">0</span>
+            <span class="dash-stat-label">总浏览帖数</span>
+          </div>
+          <div class="dash-stat-card">
+            <span class="dash-stat-num" id="dash-today-views">0</span>
+            <span class="dash-stat-label">今日浏览</span>
+          </div>
+          <div class="dash-stat-card">
+            <span class="dash-stat-num" id="dash-total-likes">0</span>
+            <span class="dash-stat-label">总点赞数</span>
+          </div>
+          <div class="dash-stat-card">
+            <span class="dash-stat-num" id="dash-today-likes">0</span>
+            <span class="dash-stat-label">今日点赞</span>
+          </div>
+        </div>
+
+        <div class="dash-toolbar">
+          <button id="btn-refresh-dash" class="btn btn-secondary">刷新</button>
+          <button id="btn-clear-dash" class="btn btn-danger">清除记录</button>
+        </div>
+
+        <div class="dash-table-wrap">
+          <table class="dash-table" id="dash-table">
+            <thead>
+              <tr>
+                <th>帖子</th>
+                <th>浏览到</th>
+                <th>赞</th>
+                <th>时间</th>
+              </tr>
+            </thead>
+            <tbody id="dash-tbody">
+              <tr><td colspan="4" class="text-muted">暂无浏览记录</td></tr>
+            </tbody>
+          </table>
         </div>
       </section>
 

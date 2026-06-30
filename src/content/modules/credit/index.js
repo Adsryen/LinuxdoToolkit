@@ -147,21 +147,22 @@ export class CreditModule extends Module {
   }
 
   /**
-   * 获取 credit.linux.do 用户信息（跨域）
+   * 获取 credit.linux.do 用户信息（通过 background 中转跨域）
    */
   async _fetchCreditInfo() {
-    const url = 'https://credit.linux.do/api/v1/oauth/user-info'
     try {
-      const resp = await fetch(url, {
-        credentials: 'include',
-        headers: {
-          Accept: 'application/json',
-          Referer: 'https://credit.linux.do/home',
-        },
+      return new Promise((resolve) => {
+        chrome.runtime.sendMessage(
+          { type: 'FETCH_CREDIT_INFO' },
+          (response) => {
+            if (response?.success) {
+              resolve(response.data)
+            } else {
+              resolve(null)
+            }
+          }
+        )
       })
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`)
-      const data = await resp.json()
-      return data?.data || null
     } catch (e) {
       console.error('[Credit] 获取基准值失败:', e)
       return null

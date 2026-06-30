@@ -51,6 +51,14 @@ export class ModuleManager {
     // 并行初始化所有已启用模块
     await Promise.all(initPromises)
 
+    // 全部初始化完成后统一启用
+    for (const [id, module] of this.modules) {
+      const isEnabled = enabledMap[id] !== false
+      if (isEnabled && module.started) {
+        try { await module.enable() } catch (e) { console.error(`[ModuleManager] 启用 ${id} 失败:`, e) }
+      }
+    }
+
     // 监听模块开关变化（禁用→启用时延迟初始化）
     settings.onEnabledChange(async (enabledMap) => {
       for (const [id, module] of this.modules) {

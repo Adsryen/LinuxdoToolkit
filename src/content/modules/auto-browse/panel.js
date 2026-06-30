@@ -15,6 +15,8 @@ export class ControlPanel {
     this.options = options
     this.container = null
     this.minimized = false
+    this._dragOffset = { x: 0, y: 0 }
+    this._isDragging = false
   }
 
   mount() {
@@ -25,6 +27,7 @@ export class ControlPanel {
     this.container.id = PANEL_ID
     this.container.innerHTML = this._buildHTML()
     document.body.appendChild(this.container)
+    this._restorePosition()
     this._bindEvents()
     this._syncButtons()
   }
@@ -100,6 +103,13 @@ export class ControlPanel {
         <button class="ab-btn ab-btn-start ab-full">开始自动浏览</button>
         <button class="ab-btn ab-btn-stop ab-full" style="display:none">停止运行</button>
         <button class="ab-btn ab-btn-clear ab-full ab-secondary">清除浏览记录</button>
+        <div class="ab-row">
+          <span class="ab-label">看完</span>
+          <div class="ab-btns">
+            <button class="ab-btn ab-readall" data-v="true">全部</button>
+            <button class="ab-btn ab-readall" data-v="false">50%</button>
+          </div>
+        </div>
         <div class="ab-stats">
           <div class="ab-stat-row"><span>状态</span><span><span class="ab-dot stopped"></span><span class="ab-status">未启动</span></span></div>
           <div class="ab-stat-row"><span>本次浏览</span><span id="ab-session-views">0</span></div>
@@ -149,6 +159,15 @@ export class ControlPanel {
         this.options.onLikeChanceChange?.(btn.dataset.v)
       })
     })
+    c.querySelectorAll('.ab-readall').forEach(btn => {
+      btn.addEventListener('click', () => {
+        this._activate(c.querySelectorAll('.ab-readall'), btn)
+        this.options.onReadAllToggle?.(btn.dataset.v === 'true')
+      })
+    })
+
+    // 拖拽
+    this._setupDrag(c.querySelector('.ab-header'))
   }
 
   _syncButtons() {
@@ -158,6 +177,18 @@ export class ControlPanel {
     this._activateByValue(c.querySelectorAll('.ab-list'), o.listType)
     this._activateByValue(c.querySelectorAll('.ab-like'), String(o.enableLike))
     this._activateByValue(c.querySelectorAll('.ab-chance'), o.likeChance)
+    this._activateByValue(c.querySelectorAll('.ab-readall'), String(o.readAll))
+  }
+
+  _restorePosition() {
+    try {
+      const pos = JSON.parse(localStorage.getItem('ltk_ab_panel_pos'))
+      if (pos) {
+        this.container.style.left = pos.left + 'px'
+        this.container.style.top = pos.top + 'px'
+        this.container.style.right = 'auto'
+      }
+    } catch {}
   }
 
   _activate(btns, active) {
@@ -168,6 +199,40 @@ export class ControlPanel {
   _activateByValue(btns, value) {
     btns.forEach(b => {
       b.classList.toggle('active', b.dataset.v === value)
+    })
+  }
+
+  _setupDrag(handle) {
+    const el = this.container
+    let startX, startY, startLeft, startTop
+
+    handle.addEventListener('mousedown', (e) => {
+      if (e.target.closest('button')) return
+      e.preventDefault()
+      this._isDragging = true
+      startX = e.clientX
+      startY = e.clientY
+      startLeft = el.offsetLeft
+      startTop = el.offsetTop
+
+      const onMove = (ev) => {
+        if (!this._isDragging) return
+        const x = Math.max(0, Math.min(window.innerWidth - 50, startLeft + ev.clientX - startX))
+        const y = Math.max(0, Math.min(window.innerHeight - 50, startTop + ev.clientY - startY))
+        el.style.left = x + 'px'
+        el.style.top = y + 'px'
+        el.style.right = 'auto'
+      }
+      const onUp = () => {
+        this._isDragging = false
+        document.removeEventListener('mousemove', onMove)
+        document.removeEventListener('mouseup', onUp)
+        try {
+          localStorage.setItem('ltk_ab_panel_pos', JSON.stringify({ left: el.offsetLeft, top: el.offsetTop }))
+        } catch {}
+      }
+      document.addEventListener('mousemove', onMove)
+      document.addEventListener('mouseup', onUp)
     })
   }
 
@@ -193,7 +258,8 @@ export class ControlPanel {
       }
       #${PANEL_ID}.minimized { min-width: auto; padding: 8px; }
       #${PANEL_ID}.minimized .ab-body { display: none; }
-      .ab-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-weight: 600; font-size: 14px; }
+      .ab-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-weight: 600; font-size: 14px; cursor: grab; }
+      .ab-header:active { cursor: grabbing; }
       #${PANEL_ID}.minimized .ab-header { margin-bottom: 0; }
       .ab-minimize { background: rgba(255,255,255,.2); border: none; color: #fff; width: 22px; height: 22px; border-radius: 50%; cursor: pointer; font-size: 14px; }
       .ab-row { display: flex; align-items: center; margin-bottom: 6px; gap: 6px; }

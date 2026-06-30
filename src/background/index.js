@@ -126,6 +126,11 @@ async function handleMessage(message, sender, sendResponse) {
         handleImportBackup(message.data, message.strategy, sendResponse)
         break
 
+      // 积分数据获取（跨域中转）
+      case 'FETCH_CREDIT_INFO':
+        handleFetchCreditInfo(sendResponse)
+        break
+
       // 打开 Options 页
       case 'OPEN_OPTIONS':
         chrome.runtime.openOptionsPage()
@@ -168,6 +173,28 @@ async function forwardToContent(message, sendResponse) {
     sendResponse({ success: true, data: [], noTab: true })
   } catch (error) {
     sendResponse({ success: false, error: error.message })
+  }
+}
+
+// ========== 积分数据获取（跨域中转） ==========
+
+async function handleFetchCreditInfo(sendResponse) {
+  try {
+    const resp = await fetch('https://credit.linux.do/api/v1/oauth/user-info', {
+      credentials: 'include',
+      headers: {
+        Accept: 'application/json',
+        Referer: 'https://credit.linux.do/home',
+      },
+    })
+    if (!resp.ok) {
+      sendResponse({ success: false, error: `HTTP ${resp.status}` })
+      return
+    }
+    const json = await resp.json()
+    sendResponse({ success: true, data: json?.data || null })
+  } catch (e) {
+    sendResponse({ success: false, error: e.message })
   }
 }
 

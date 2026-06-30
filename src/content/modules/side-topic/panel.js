@@ -235,13 +235,13 @@ export class SidePanel {
       #${PANEL_ID} {
         position: fixed;
         z-index: ${Z_INDEX.panel};
-        background: var(--stp-bg, #fff);
-        border: 1px solid var(--stp-border, #e5e7eb);
+        background: var(--ltk-bg, #fff);
+        border: 1px solid var(--ltk-border, #e5e7eb);
         border-radius: 10px;
-        box-shadow: 0 4px 16px rgba(0,0,0,.12);
+        box-shadow: var(--ltk-shadow, 0 4px 16px rgba(0,0,0,.12));
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         font-size: 13px;
-        color: var(--stp-text, #1a1a2e);
+        color: var(--ltk-text, #1a1a2e);
         display: flex;
         flex-direction: column;
         overflow: hidden;
@@ -254,8 +254,8 @@ export class SidePanel {
         align-items: center;
         justify-content: space-between;
         padding: 8px 12px;
-        background: var(--stp-header-bg, #f8f9fa);
-        border-bottom: 1px solid var(--stp-border, #e5e7eb);
+        background: var(--ltk-header-bg, #f8f9fa);
+        border-bottom: 1px solid var(--ltk-border, #e5e7eb);
         cursor: grab;
         flex-shrink: 0;
       }
@@ -269,33 +269,33 @@ export class SidePanel {
         border-radius: 4px;
         display: flex; align-items: center; justify-content: center;
       }
-      .stp-btn:hover { background: var(--stp-hover, #f0f1f3); }
+      .stp-btn:hover { background: var(--ltk-hover, #f0f1f3); }
       .stp-body { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
       .stp-feeds {
         display: flex; gap: 2px; padding: 6px 8px;
-        border-bottom: 1px solid var(--stp-border, #e5e7eb);
+        border-bottom: 1px solid var(--ltk-border, #e5e7eb);
         flex-shrink: 0;
       }
       .stp-feed-btn {
         flex: 1; padding: 4px 8px;
-        background: none; border: 1px solid var(--stp-border, #e5e7eb);
+        background: none; border: 1px solid var(--ltk-border, #e5e7eb);
         border-radius: 4px; font-size: 11px; cursor: pointer;
-        color: var(--stp-text-secondary, #6b7280);
+        color: var(--ltk-text-secondary, #6b7280);
         transition: all .15s;
       }
-      .stp-feed-btn:hover { background: var(--stp-hover, #f0f1f3); }
+      .stp-feed-btn:hover { background: var(--ltk-hover, #f0f1f3); }
       .stp-feed-btn.active {
-        background: var(--stp-primary, #3b82f6);
-        color: #fff; border-color: var(--stp-primary, #3b82f6);
+        background: var(--ltk-primary, #3b82f6);
+        color: #fff; border-color: var(--ltk-primary, #3b82f6);
       }
       .stp-list { flex: 1; overflow-y: auto; }
       .stp-topic {
         padding: 8px 12px;
-        border-bottom: 1px solid var(--stp-border, #e5e7eb);
+        border-bottom: 1px solid var(--ltk-border, #e5e7eb);
         cursor: pointer;
         transition: background .1s;
       }
-      .stp-topic:hover { background: var(--stp-hover, #f0f1f3); }
+      .stp-topic:hover { background: var(--ltk-hover, #f0f1f3); }
       .stp-topic-title {
         font-size: 13px; font-weight: 500;
         margin-bottom: 4px; line-height: 1.3;
@@ -304,35 +304,24 @@ export class SidePanel {
       }
       .stp-topic-meta {
         display: flex; gap: 8px; font-size: 11px;
-        color: var(--stp-text-muted, #9ca3af);
+        color: var(--ltk-text-muted, #9ca3af);
       }
       .stp-unread {
-        background: var(--stp-primary, #3b82f6);
+        background: var(--ltk-primary, #3b82f6);
         color: #fff; font-size: 10px;
         padding: 1px 5px; border-radius: 8px;
         font-weight: 600;
       }
       .stp-empty {
         text-align: center; padding: 24px;
-        color: var(--stp-text-muted, #9ca3af);
+        color: var(--ltk-text-muted, #9ca3af);
         font-size: 12px;
       }
       .stp-resize-handle {
         position: absolute; bottom: 0; left: 0;
         width: 16px; height: 16px;
         cursor: nwse-resize;
-      }
-      .dark #${PANEL_ID}, [data-theme="dark"] #${PANEL_ID} {
-        --stp-bg: #1a1a2e;
-        --stp-header-bg: #16162a;
-        --stp-border: #2d2d4a;
-        --stp-text: #e2e8f0;
-        --stp-text-secondary: #94a3b8;
-        --stp-text-muted: #64748b;
-        --stp-hover: #222240;
-        --stp-primary: #3b82f6;
-      }
-    `
+      `
     document.head.appendChild(style)
   }
 }

@@ -8,9 +8,7 @@
  */
 
 import { ModuleManager } from './modules/index.js'
-import { Toolbar } from './toolbar/index.js'
 import { Navigation } from '../utils/navigation.js'
-import { settings } from '../utils/settings.js'
 import { ConflictDetector } from '../utils/conflict.js'
 
 /**
@@ -19,7 +17,6 @@ import { ConflictDetector } from '../utils/conflict.js'
 class LinuxdoToolkit {
   constructor() {
     this.moduleManager = new ModuleManager()
-    this.toolbar = null
     this.navigation = Navigation
     this.initialized = false
   }
@@ -39,9 +36,6 @@ class LinuxdoToolkit {
       // 初始化模块管理器（内部会初始化 settings 和所有模块）
       await this.moduleManager.init()
 
-      // 创建浮动工具栏
-      this.setupToolbar()
-
       // 设置 SPA 导航监听
       this.setupNavigation()
 
@@ -56,17 +50,6 @@ class LinuxdoToolkit {
     } catch (error) {
       console.error('LinuxdoToolkit 初始化失败:', error)
     }
-  }
-
-  /**
-   * 创建浮动工具栏
-   */
-  setupToolbar() {
-    const globalSettings = settings.getGlobal()
-    if (globalSettings.toolbarEnabled === false) return
-
-    this.toolbar = new Toolbar(this.moduleManager)
-    this.toolbar.mount()
   }
 
   /**
@@ -104,19 +87,16 @@ class LinuxdoToolkit {
 
         case 'TOGGLE_MODULE':
           await this.moduleManager.toggle(message.moduleId)
-          this.toolbar?.refreshStatusBars()
           sendResponse({ success: true })
           break
 
         case 'ENABLE_MODULE':
           await this.moduleManager.enable(message.moduleId)
-          this.toolbar?.refreshStatusBars()
           sendResponse({ success: true })
           break
 
         case 'DISABLE_MODULE':
           await this.moduleManager.disable(message.moduleId)
-          this.toolbar?.refreshStatusBars()
           sendResponse({ success: true })
           break
 

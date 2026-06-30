@@ -340,6 +340,125 @@ html, body {
   background: #dc2626;
 }
 
+/* Dashboard */
+.dash-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.dash-stat-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  text-align: center;
+}
+
+.dash-stat-num {
+  display: block;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 4px;
+}
+
+.dash-stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.dash-toolbar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.dash-table-wrap {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.dash-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.dash-table th {
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+}
+
+.dash-table td {
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.dash-table tr:last-child td {
+  border-bottom: none;
+}
+
+.dash-table tr:hover td {
+  background: var(--bg-secondary);
+}
+
+.dash-topic-link {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 500;
+  display: block;
+  max-width: 300px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dash-topic-link:hover {
+  text-decoration: underline;
+}
+
+.dash-progress {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.dash-progress-bar {
+  display: inline-block;
+  width: 60px;
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  margin-right: 6px;
+  vertical-align: middle;
+  overflow: hidden;
+}
+
+.dash-progress-fill {
+  display: block;
+  height: 100%;
+  background: var(--primary);
+  border-radius: 3px;
+}
+
+.dash-like {
+  font-size: 14px;
+}
+
+.dash-time {
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
 /* Backup */
 .backup-grid {
   display: grid;

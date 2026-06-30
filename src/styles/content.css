@@ -5,27 +5,37 @@
  * 供 UI Enhance 模块使用的主题 CSS 变量。
  */
 
-/* ==================== 主题 CSS 变量 ==================== */
+/* ==================== 主题 CSS 变量（统一命名空间 --ltk-*） ==================== */
 
 :root {
   --ltk-primary: #3b82f6;
   --ltk-primary-hover: #2563eb;
+  --ltk-primary-light: #eff6ff;
   --ltk-bg: #ffffff;
   --ltk-bg-secondary: #f8f9fa;
+  --ltk-header-bg: #f8f9fa;
+  --ltk-hover: #f0f1f3;
   --ltk-text: #1a1a2e;
   --ltk-text-secondary: #6b7280;
+  --ltk-text-muted: #9ca3af;
   --ltk-border: #e5e7eb;
+  --ltk-shadow: 0 4px 16px rgba(0,0,0,.12);
 }
 
 /* 深色主题 */
 html.ltk-dark {
   --ltk-primary: #60a5fa;
   --ltk-primary-hover: #93bbfd;
-  --ltk-bg: #0f172a;
-  --ltk-bg-secondary: #1e293b;
+  --ltk-primary-light: #1e2a4a;
+  --ltk-bg: #1a1a2e;
+  --ltk-bg-secondary: #16162a;
+  --ltk-header-bg: #16162a;
+  --ltk-hover: #222240;
   --ltk-text: #e2e8f0;
   --ltk-text-secondary: #94a3b8;
-  --ltk-border: #334155;
+  --ltk-text-muted: #64748b;
+  --ltk-border: #2d2d4a;
+  --ltk-shadow: 0 4px 16px rgba(0,0,0,.3);
   color-scheme: dark;
 }
 
@@ -33,22 +43,32 @@ html.ltk-dark {
 html.ltk-green {
   --ltk-primary: #16a34a;
   --ltk-primary-hover: #15803d;
+  --ltk-primary-light: #dcfce7;
   --ltk-bg: #f0fdf4;
   --ltk-bg-secondary: #dcfce7;
+  --ltk-header-bg: #dcfce7;
+  --ltk-hover: #bbf7d0;
   --ltk-text: #14532d;
   --ltk-text-secondary: #166534;
+  --ltk-text-muted: #4ade80;
   --ltk-border: #bbf7d0;
+  --ltk-shadow: 0 4px 16px rgba(0,0,0,.08);
 }
 
 /* 雅紫主题 */
 html.ltk-purple {
   --ltk-primary: #7c3aed;
   --ltk-primary-hover: #6d28d9;
+  --ltk-primary-light: #f3e8ff;
   --ltk-bg: #faf5ff;
   --ltk-bg-secondary: #f3e8ff;
+  --ltk-header-bg: #f3e8ff;
+  --ltk-hover: #e9d5ff;
   --ltk-text: #3b0764;
   --ltk-text-secondary: #6b21a8;
+  --ltk-text-muted: #a78bfa;
   --ltk-border: #e9d5ff;
+  --ltk-shadow: 0 4px 16px rgba(0,0,0,.08);
 }
 
 /* ==================== 暗黑模式增强 ==================== */

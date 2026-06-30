@@ -36,11 +36,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('#about-version').textContent = `v${manifest.version}`
 
   setupNavigation()
+  setupDashboard()
   setupGlobalSettings()
   setupToolbarSettings()
   setupBackup()
 
   await loadModules()
+  await loadDashboard()
   await loadGlobalSettings()
   await loadToolbarSettings()
   await loadSnapshots()
@@ -303,6 +305,75 @@ async function loadSnapshots() {
   } catch {
     // 忽略
   }
+}
+
+// ========== 仪表盘 ==========
+
+function setupDashboard() {
+  $('#btn-refresh-dash').addEventListener('click', () => loadDashboard())
+  $('#btn-clear-dash').addEventListener('click', () => {
+    if (!confirm('确定清除所有浏览记录？此操作不可撤销。')) return
+    chrome.storage.local.set({ 'toolkit.history.records': [], 'toolkit.history.likes': [] }, () => {
+      loadDashboard()
+      toast('记录已清除', 'success')
+    })
+  })
+}
+
+async function loadDashboard() {
+  const result = await chrome.storage.local.get(['toolkit.history.records', 'toolkit.history.likes'])
+  const records = result['toolkit.history.records'] || []
+  const likes = result['toolkit.history.likes'] || []
+
+  const now = Date.now()
+  const today = 86400000
+
+  $('#dash-total-views').textContent = records.length
+  $('#dash-today-views').textContent = records.filter(r => r.updatedAt > now - today).length
+  $('#dash-total-likes').textContent = likes.length
+  $('#dash-today-likes').textContent = likes.filter(l => l.timestamp > now - today).length
+
+  const tbody = $('#dash-tbody')
+  if (!records.length) {
+    tbody.innerHTML = '<tr><td colspan="4" class="text-muted">暂无浏览记录</td></tr>'
+    return
+  }
+
+  tbody.innerHTML = records.slice(0, 50).map(r => {
+    const title = r.title || '无标题'
+    const progress = r.totalPosts > 0 ? Math.round((r.browsedTo / r.totalPosts) * 100) : 0
+    const time = formatTime(r.updatedAt || r.createdAt)
+    return `
+      <tr>
+        <td>
+          <a class="dash-topic-link" href="${r.url || '/t/topic/' + r.topicId}" target="_blank" title="${title}">
+            #${r.topicId} ${title}
+          </a>
+        </td>
+        <td>
+          <span class="dash-progress">
+            <span class="dash-progress-bar"><span class="dash-progress-fill" style="width:${progress}%"></span></span>
+            ${r.browsedTo || 0} / ${r.totalPosts || '-'} 楼
+          </span>
+        </td>
+        <td><span class="dash-like">${r.liked ? '❤️' : '-'}</span></td>
+        <td><span class="dash-time">${time}</span></td>
+      </tr>`
+  }).join('')
+}
+
+function formatTime(timestamp) {
+  if (!timestamp) return '-'
+  const d = new Date(timestamp)
+  const now = new Date()
+  const diff = now - d
+
+  if (diff < 60000) return '刚刚'
+  if (diff < 3600000) return `${Math.floor(diff / 60000)} 分钟前`
+  if (diff < 86400000) return `${Math.floor(diff / 3600000)} 小时前`
+  if (diff < 604800000) return `${Math.floor(diff / 86400000)} 天前`
+
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
 // ========== 工具函数 ==========
