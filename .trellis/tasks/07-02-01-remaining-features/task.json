@@ -1,0 +1,32 @@
+{
+  "id": "01-remaining-features",
+  "name": "01-remaining-features",
+  "title": "完成 LinuxdoToolkit 剩余功能开发",
+  "description": "根据 todo.md 规划，完成 Phase 1-5 中所有未完成的功能项。涵盖 Options 页表单渲染器、积分模块 Options 接入、自动浏览扩展功能、话题侧栏筛选、快速预览扩展等。",
+  "status": "planning",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P1",
+  "creator": "ryen",
+  "assignee": "ryen",
+  "createdAt": "2026-07-02",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [
+    "07-02-01a-options-form",
+    "07-02-01b-credit-options",
+    "07-02-01c-auto-browse-extras",
+    "07-02-01d-side-topic-extras",
+    "07-02-01e-peek-extras"
+  ],
+  "parent": null,
+  "relatedFiles": [],
+  "notes": "",
+  "meta": {}
+}

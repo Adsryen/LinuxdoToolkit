@@ -41,4 +41,6 @@ temp/
 # ai
 .claude/
 .codex/
+.agents/
 .trae/
+.cursor/
