@@ -198,7 +198,7 @@ export function getPageType(url) {
   if (url.includes('/t/')) return 'topic'
   if (url.includes('/c/')) return 'category'
   if (url.includes('/u/') || url.includes('/my/')) return 'user'
-  if (url.includes('/top') || url.includes('/latest') || url.includes('/new')) return 'list'
+  if (url.includes('/top') || url.includes('/latest') || url.includes('/new') || url.includes('/unread')) return 'list'
   if (/https?:\/\/[^/]+\/?$/.test(url)) return 'home'
   return 'other'
 }

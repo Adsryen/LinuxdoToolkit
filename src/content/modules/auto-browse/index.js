@@ -42,7 +42,7 @@ export class AutoBrowseModule extends Module {
         maxSessionViews: 50,
         maxSessionLikes: 50,
         autoResume: false,
-        readAll: false,       // 看完所有帖子，不跳过已浏览
+        readAll: false,       // 单篇阅读模式：true 看完，false 读到约 50~65%
       },
     })
 
@@ -89,8 +89,8 @@ export class AutoBrowseModule extends Module {
     })
     this.panel.mount()
 
-    // 恢复上次状态
-    if (s.autoResume && this._loadRunning()) {
+    // 恢复上次运行状态：使用整页跳转，每次页面加载时自动恢复
+    if (this._shouldResume(s)) {
       setTimeout(() => this.start(), 2000)
     }
   }
@@ -134,7 +134,7 @@ export class AutoBrowseModule extends Module {
         { key: 'maxSessionViews', label: '单次最大浏览', type: 'number', default: 50 },
         { key: 'maxSessionLikes', label: '单次最大点赞', type: 'number', default: 50 },
         { key: 'autoResume',   label: '自动恢复运行', type: 'toggle', default: false },
-        { key: 'readAll',      label: '看完所有帖子',  type: 'toggle', default: false, description: '不跳过已浏览的帖子，从头看到尾' },
+        { key: 'readAll',      label: '单篇阅读深度',  type: 'toggle', default: false, description: '全部：从第一楼看到底；50%：读到约 50~65% 后进入下一帖' },
       ],
     }
   }
@@ -226,5 +226,11 @@ export class AutoBrowseModule extends Module {
 
   _loadRunning() {
     try { return JSON.parse(localStorage.getItem('ltk_auto_running') || 'false') } catch { return false }
+  }
+
+  _shouldResume(s) {
+    // 简化为只检查 localStorage 中的运行标记
+    // 使用整页跳转（window.location.href），每次页面加载时自动恢复
+    return this._loadRunning()
   }
 }
