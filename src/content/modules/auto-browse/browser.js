@@ -326,9 +326,24 @@ export class BrowseEngine {
     const topicId = this._getTopicId(window.location.href)
     console.log('[BrowseEngine] 开始滚动浏览, topicId:', topicId)
 
-    if (topicId && !this._sessionViewed.has(topicId)) {
-      this._sessionViewed.add(topicId)
-      this.sessionViews++
+    // 记录浏览历史：进入话题页
+    const topicTitle = this._extractTopicTitle()
+    const totalPosts = this._extractTotalPosts()
+
+    if (topicId) {
+      if (!this._sessionViewed.has(topicId)) {
+        this._sessionViewed.add(topicId)
+        this.sessionViews++
+      }
+
+      history.addRecord({
+        topicId,
+        title: topicTitle,
+        url: window.location.href,
+        browsedTo: 0,
+        totalPosts,
+        liked: false,
+      })
       this._emitStats()
     }
 
@@ -375,6 +390,18 @@ export class BrowseEngine {
     // 离开当前话题页
     this.isScrolling = false
     this._lsSave('accumulatedTime', this.accumulatedTime)
+
+    // 更新浏览记录：已浏览到的楼数
+    if (topicId) {
+      const browsedTo = this._getCurrentPostNumber()
+      history.addRecord({
+        topicId,
+        title: topicTitle,
+        url: window.location.href,
+        browsedTo,
+        totalPosts: this._extractTotalPosts(),
+      })
+    }
 
     if (this.running) {
       await sleep(800)
@@ -424,6 +451,52 @@ export class BrowseEngine {
   _getTopicId(url) {
     const m = url?.match(/\/t\/topic\/(\d+)/) || url?.match(/\/t\/[^/]+\/(\d+)/)
     return m ? m[1] : null
+  }
+
+  /**
+   * 从页面 DOM 提取话题标题
+   */
+  _extractTopicTitle() {
+    // 优先使用 fancy-title 链接
+    const fancyTitle = document.querySelector('a.fancy-title')
+    if (fancyTitle) return fancyTitle.textContent.trim()
+
+    // 回退到 document.title
+    const title = document.title
+    return title ? title.replace(/\s*[-–—]\s*Linux\.do.*$/i, '').trim() : ''
+  }
+
+  /**
+   * 从页面 DOM 提取总回复数
+   */
+  _extractTotalPosts() {
+    // 从 .topic-post 数量推断
+    const postCount = document.querySelectorAll('.topic-post').length
+    if (postCount > 0) return postCount
+
+    // 从页面元数据获取
+    const meta = document.querySelector('[data-post-count]')
+    if (meta) return parseInt(meta.dataset.postCount) || 0
+
+    return 0
+  }
+
+  /**
+   * 获取当前页面最后一个可见帖子的楼层号
+   */
+  _getCurrentPostNumber() {
+    const posts = document.querySelectorAll('.topic-post')
+    if (posts.length === 0) return 0
+
+    // 获取最后一个帖子的楼层号
+    const lastPost = posts[posts.length - 1]
+    const postNumber = lastPost.querySelector('.post-number')
+    if (postNumber) {
+      const num = parseInt(postNumber.textContent)
+      if (!isNaN(num)) return num
+    }
+
+    return posts.length
   }
 
   _emitStats() {

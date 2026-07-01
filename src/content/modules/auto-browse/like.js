@@ -5,6 +5,8 @@
  * 使用 PUT /discourse-reactions/posts/{id}/custom-reactions/heart/toggle.json
  */
 
+import { history } from '../../../utils/history.js'
+
 const LIKE_CHANCES = {
   low:     0.05,
   medium:  0.15,
@@ -79,6 +81,13 @@ export class LikeSystem {
       this.sessionLiked++
       this.lastLikeTime = Date.now()
       this._saveLiked()
+
+      // 记录点赞到 history
+      const topicId = this._getTopicId()
+      if (topicId) {
+        history.addLike(topicId, actualId)
+      }
+
       return { success: true }
     }
 
@@ -139,6 +148,14 @@ export class LikeSystem {
       '#dialog-holder button.btn-primary, #dialog-holder button'
     )
     closeBtn?.click()
+  }
+
+  /**
+   * 从当前 URL 提取话题 ID
+   */
+  _getTopicId() {
+    const m = window.location.href?.match(/\/t\/topic\/(\d+)/)
+    return m ? m[1] : null
   }
 
   _saveLiked() {

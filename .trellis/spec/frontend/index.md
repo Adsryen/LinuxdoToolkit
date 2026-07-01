@@ -14,12 +14,12 @@ This directory contains guidelines for frontend development. Fill in each file w
 
 | Guide | Description | Status |
 |-------|-------------|--------|
-| [Directory Structure](./directory-structure.md) | Module organization and file layout | To fill |
-| [Component Guidelines](./component-guidelines.md) | Component patterns, props, composition | To fill |
-| [Hook Guidelines](./hook-guidelines.md) | Custom hooks, data fetching patterns | To fill |
-| [State Management](./state-management.md) | Local state, global state, server state | To fill |
-| [Quality Guidelines](./quality-guidelines.md) | Code standards, forbidden patterns | To fill |
-| [Type Safety](./type-safety.md) | Type patterns, validation | To fill |
+| [Directory Structure](./directory-structure.md) | Chrome Extension MV3 directory layout and module organization | ✅ Filled |
+| [Module Guidelines](./component-guidelines.md) | Module base class, UI component patterns, styling conventions | ✅ Filled |
+| [Utility & Event Patterns](./hook-guidelines.md) | Utility functions, EventBus, settings manager, message passing | ✅ Filled |
+| [State Management](./state-management.md) | chrome.storage.local patterns, change propagation, data flow | ✅ Filled |
+| [Quality Guidelines](./quality-guidelines.md) | Error handling, logging, cleanup, forbidden patterns, review checklist | ✅ Filled |
+| [Type Safety](./type-safety.md) | JSDoc conventions, type patterns, runtime validation | ✅ Filled |
 
 ---
 

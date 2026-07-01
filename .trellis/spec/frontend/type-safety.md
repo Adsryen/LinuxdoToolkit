@@ -1,51 +1,170 @@
 # Type Safety
 
-> Type safety patterns in this project.
+> This project is **vanilla JavaScript** — no TypeScript. Type safety is achieved through **JSDoc annotations** and runtime validation.
 
 ---
 
-## Overview
+## JSDoc Conventions
 
-<!--
-Document your project's type safety conventions here.
+The project uses JSDoc for type annotations. These are not enforced at build time but serve as documentation for AI assistants and developers.
 
-Questions to answer:
-- What type system do you use?
-- How are types organized?
-- What validation library do you use?
-- How do you handle type inference?
--->
+### Parameter types
 
-(To be filled by the team)
+```javascript
+/**
+ * @param {string} moduleId - Module identifier
+ * @param {object} [defaults] - Default settings (optional)
+ * @returns {Promise<object>}
+ */
+async getModule(moduleId, defaults = {}) { ... }
+```
+
+### Complex types
+
+```javascript
+/**
+ * @param {Object} options
+ * @param {string} options.speed - Speed preset name
+ * @param {number} options.maxViews - Maximum views per session
+ * @param {Function} [options.onStart] - Callback when browsing starts
+ * @param {Function} [options.onStop] - Callback when browsing stops
+ */
+constructor(options = {}) { ... }
+```
+
+### Map and Set types
+
+```javascript
+/** @type {Map<string, Module>} */
+this.modules = new Map()
+
+/** @type {Map<string, Set<Function>>} */
+const listeners = new Map()
+```
+
+### Return types
+
+```javascript
+/**
+ * @returns {StatusBarConfig|null}
+ */
+getStatusBar() { return null }
+
+/**
+ * @returns {SettingsSchema|null}
+ */
+getSettingsSchema() { return null }
+```
 
 ---
 
-## Type Organization
+## Type Patterns in Use
 
-<!-- Where types are defined, shared types vs local types -->
+### Module config shape
 
-(To be filled by the team)
+```javascript
+// Module constructor config
+{
+  id: 'auto-browse',           // string
+  name: '自动浏览',             // string
+  icon: '🔄',                  // string (emoji)
+  description: '...',          // string
+  category: 'efficiency',      // 'efficiency' | 'ui' | 'data' | 'preview' | 'other'
+  defaultSettings: {           // object
+    speed: 'normal',           // string
+    enableLike: true,          // boolean
+    maxSessionViews: 50,       // number
+  },
+}
+```
+
+### Settings schema shape
+
+```javascript
+{
+  fields: [
+    {
+      key: 'speed',            // string — storage key
+      label: '浏览速度',        // string — display label
+      type: 'select',          // 'select' | 'toggle' | 'number' | 'text'
+      options: [...],          // for 'select': [{ value, label }]
+      default: 'normal',       // default value
+    },
+  ],
+}
+```
+
+### Status bar shape
+
+```javascript
+{
+  text: '已浏览 23 帖 · 点赞 5',          // string — display text
+  actions: [                              // optional action buttons
+    { label: '暂停', onClick: () => {} },
+  ],
+}
+```
+
+### Message shape (extension IPC)
+
+```javascript
+// Request
+{ type: 'ENABLE_MODULE', moduleId: 'credit' }
+
+// Response
+{ success: true, data: { ... } }
+{ success: false, error: 'Error message' }
+```
 
 ---
 
-## Validation
+## Runtime Validation
 
-<!-- Runtime validation patterns (Zod, Yup, io-ts, etc.) -->
+Since there's no compile-time type checking, use defensive patterns:
 
-(To be filled by the team)
+### Default values with nullish coalescing
 
----
+```javascript
+const interval = settings.refreshInterval || REFRESH_INTERVAL
+const enabled = enabledMap[id] !== false  // default to true
+```
 
-## Common Patterns
+### Guard clauses
 
-<!-- Type utilities, generics, type guards -->
+```javascript
+if (!this.container) return
+if (!this.widget) return
+if (!resp?.success) throw new Error(resp?.error)
+```
 
-(To be filled by the team)
+### Optional chaining
+
+```javascript
+this.panel?.unmount()
+this.cache?.prefetch(topicId)
+const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content
+```
+
+### Destructuring with defaults
+
+```javascript
+const { 'toolkit.backups': backups = [] } = await chrome.storage.local.get('toolkit.backups')
+const { 'toolkit.global': globalSettings } = await chrome.storage.local.get('toolkit.global')
+```
 
 ---
 
 ## Forbidden Patterns
 
-<!-- any, type assertions, etc. -->
+- ❌ `any` type in JSDoc (always specify the actual type)
+- ❌ Type coercion with `==` (use `===` and `!==`)
+- ❌ `typeof x === 'object'` without null check (use `x !== null && typeof x === 'object'`)
+- ❌ Assuming `chrome.storage.local.get()` returns a value (always provide defaults)
 
-(To be filled by the team)
+---
+
+## Common Mistakes
+
+1. **Not handling `null` from storage** — `chrome.storage.local.get('key')` returns `{ key: undefined }` if key doesn't exist. Always provide defaults: `result['key'] || {}`
+2. **Assuming `sendResponse` is synchronous** — always `return true` in `chrome.runtime.onMessage` for async handlers
+3. **Mutating `this.settings` directly** — use `settings.setModule()` to persist changes
