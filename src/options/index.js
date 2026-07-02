@@ -52,6 +52,7 @@ const MODULE_SCHEMAS = {
       { key: 'refreshInterval', label: '刷新间隔', type: 'select', options: [
         { value: 60000, label: '1 分钟' }, { value: 300000, label: '5 分钟' }, { value: 600000, label: '10 分钟' }, { value: 1800000, label: '30 分钟' },
       ], default: 300000 },
+      { key: 'resetPosition', label: '重置悬浮位置', type: 'action', action: 'reset-position', description: '将积分悬浮组件恢复到默认位置（右下角）' },
     ],
   },
   'side-topic': {
@@ -90,10 +91,12 @@ class FormRenderer {
   /**
    * @param {object} schema - { fields: [...] }
    * @param {object} values - 当前值 { key: value }
+   * @param {string} moduleId - 模块 ID
    */
-  constructor(schema, values = {}) {
+  constructor(schema, values = {}, moduleId = '') {
     this.schema = schema
     this.values = { ...values }
+    this.moduleId = moduleId
     this.onChange = null
   }
 
@@ -142,6 +145,9 @@ class FormRenderer {
         break
       case 'number':
         right.appendChild(this._renderNumber(field, value))
+        break
+      case 'action':
+        right.appendChild(this._renderAction(field))
         break
     }
 
@@ -199,6 +205,35 @@ class FormRenderer {
       }
     })
     return input
+  }
+
+  _renderAction(field) {
+    const btn = document.createElement('button')
+    btn.className = 'btn btn-secondary btn-sm'
+    btn.textContent = field.label
+    btn.addEventListener('click', async () => {
+      btn.disabled = true
+      btn.textContent = '处理中...'
+      try {
+        if (field.action === 'reset-position') {
+          const key = `toolkit.module.${this.moduleId}`
+          const result = await chrome.storage.local.get(key)
+          const current = result[key] || {}
+          const updated = { ...current, position: null }
+          await chrome.storage.local.set({ [key]: updated })
+          try {
+            await sendMessage({ type: 'SET_MODULE_SETTINGS', moduleId: this.moduleId, value: updated })
+          } catch {}
+          toast('位置已重置', 'success')
+        }
+        this.onChange?.(field.key, true)
+      } catch (e) {
+        toast('操作失败: ' + e.message, 'error')
+      }
+      btn.disabled = false
+      btn.textContent = field.label
+    })
+    return btn
   }
 }
 
@@ -331,7 +366,7 @@ async function toggleModuleDetail(moduleId, card) {
   detail.appendChild(title)
 
   // 渲染表单
-  const formRenderer = new FormRenderer(schema, values)
+  const formRenderer = new FormRenderer(schema, values, moduleId)
   formRenderer.onChange = (key, newValue) => {
     values[key] = newValue
     debounceSaveSettings(moduleId, values)

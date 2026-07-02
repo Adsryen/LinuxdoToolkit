@@ -69,6 +69,12 @@ export class CreditModule extends Module {
     if (this.timer) clearInterval(this.timer)
     const interval = newSettings.refreshInterval || REFRESH_INTERVAL
     this.timer = setInterval(() => this.refresh(), interval)
+
+    // 重置位置
+    if (newSettings.position === null && this.widget) {
+      this.widget.position = null
+      this.widget._restorePosition()
+    }
   }
 
   /**
