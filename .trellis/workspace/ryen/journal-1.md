@@ -104,3 +104,36 @@ Options 页实现 FormRenderer 通用表单渲染器，支持 toggle/select/numb
 ### Next Steps
 
 - None - task complete
+
+
+## Session 4: 01b 积分模块 Options 页接入
+
+**Date**: 2026-07-02
+**Task**: 01b 积分模块 Options 页接入
+**Branch**: `main`
+
+### Summary
+
+FormRenderer 新增 action 按钮类型；积分模块 Options 页可修改刷新间隔、重置悬浮位置；credit 模块 onSettingsChange 处理位置重置
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `3d00c5c` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
