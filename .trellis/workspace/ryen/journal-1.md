@@ -71,3 +71,36 @@
 ### Next Steps
 
 - None - task complete
+
+
+## Session 3: 01a 通用表单渲染器 + 快捷键配置
+
+**Date**: 2026-07-02
+**Task**: 01a 通用表单渲染器 + 快捷键配置
+**Branch**: `main`
+
+### Summary
+
+Options 页实现 FormRenderer 通用表单渲染器，支持 toggle/select/number 三种字段类型；添加模块详情面板点击展开交互、debounce 保存设置到 storage 并通知 content script；新增 Ctrl+Shift+L 切换工具栏、Ctrl+Shift+M 切换模块快捷键
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `9d63673` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
