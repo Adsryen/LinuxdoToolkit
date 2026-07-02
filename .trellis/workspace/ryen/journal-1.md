@@ -38,3 +38,36 @@
 ### Next Steps
 
 - None - task complete
+
+
+## Session 2: 01g 修复浏览楼数不准确
+
+**Date**: 2026-07-02
+**Task**: 01g 修复浏览楼数不准确
+**Branch**: `main`
+
+### Summary
+
+重写 _getCurrentPostNumber() 和 _extractTotalPosts()，从 Discourse timeline-replies 组件读取准确楼层和总数，替代不准确的 DOM 计数方式
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `00c01d6` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
