@@ -17,6 +17,7 @@ export class ControlPanel {
     this.minimized = false
     this._dragOffset = { x: 0, y: 0 }
     this._isDragging = false
+    this._restCountdown = null
   }
 
   mount() {
@@ -33,6 +34,7 @@ export class ControlPanel {
   }
 
   unmount() {
+    this._stopRestCountdown()
     this.container?.remove()
     this.container = null
   }
@@ -55,6 +57,51 @@ export class ControlPanel {
     set('ab-session-likes', stats.sessionLikes ?? 0)
     set('ab-total-views', stats.totalViews ?? 0)
     set('ab-total-likes', stats.totalLikes ?? 0)
+  }
+
+  /**
+   * 显示休息中状态
+   */
+  setResting(durationMs, endTime) {
+    if (!this.container) return
+    const restEl = this.container.querySelector('.ab-rest')
+    if (!restEl) return
+    restEl.style.display = 'block'
+    this._stopRestCountdown()
+    const tick = () => {
+      const left = Math.max(0, endTime - Date.now())
+      const min = Math.floor(left / 60000)
+      const sec = Math.floor((left % 60000) / 1000)
+      const countdown = restEl.querySelector('.ab-rest-countdown')
+      if (countdown) countdown.textContent = `${min}:${String(sec).padStart(2, '0')}`
+      if (left <= 0) this._stopRestCountdown()
+    }
+    tick()
+    this._restCountdown = setInterval(tick, 1000)
+  }
+
+  setRestEnd() {
+    if (!this.container) return
+    const restEl = this.container.querySelector('.ab-rest')
+    if (restEl) restEl.style.display = 'none'
+    this._stopRestCountdown()
+  }
+
+  _stopRestCountdown() {
+    if (this._restCountdown) {
+      clearInterval(this._restCountdown)
+      this._restCountdown = null
+    }
+  }
+
+  /**
+   * 更新必读列表显示
+   */
+  updateMustRead(mustRead) {
+    if (!this.container) return
+    const listEl = this.container.querySelector('.ab-mustread-list')
+    if (!listEl) return
+    this._renderMustReadList(listEl, mustRead)
   }
 
   // ========== 内部 ==========
@@ -117,6 +164,18 @@ export class ControlPanel {
           <div class="ab-stat-row"><span>总计浏览</span><span id="ab-total-views">0</span></div>
           <div class="ab-stat-row"><span>总计点赞</span><span id="ab-total-likes">0</span></div>
         </div>
+        <div class="ab-rest" style="display:none">
+          <div class="ab-rest-text">休息中... <span class="ab-rest-countdown">0:00</span></div>
+          <button class="ab-btn ab-btn-skip-rest ab-full">跳过休息</button>
+        </div>
+        <div class="ab-mustread">
+          <div class="ab-mustread-title">📌 必读列表</div>
+          <div class="ab-mustread-add">
+            <input class="ab-mustread-input" placeholder="https://linux.do/t/topic/..." />
+            <button class="ab-btn ab-mustread-add-btn">添加</button>
+          </div>
+          <div class="ab-mustread-list"></div>
+        </div>
       </div>
     `
   }
@@ -168,6 +227,56 @@ export class ControlPanel {
 
     // 拖拽
     this._setupDrag(c.querySelector('.ab-header'))
+
+    // 必读列表
+    c.querySelector('.ab-mustread-add-btn').addEventListener('click', () => {
+      const input = c.querySelector('.ab-mustread-input')
+      const url = input.value.trim()
+      if (url) {
+        this.options.onAddMustRead?.(url)
+        input.value = ''
+      }
+    })
+    c.querySelector('.ab-mustread-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const url = e.target.value.trim()
+        if (url) {
+          this.options.onAddMustRead?.(url)
+          e.target.value = ''
+        }
+      }
+    })
+
+    // 跳过休息
+    c.querySelector('.ab-btn-skip-rest').addEventListener('click', () => {
+      this.options.onSkipRest?.()
+    })
+
+    // 初始渲染必读列表
+    this._renderMustReadList(c.querySelector('.ab-mustread-list'), this.options.mustRead || [])
+  }
+
+  _renderMustReadList(listEl, mustRead) {
+    if (!listEl) return
+    if (!mustRead.length) {
+      listEl.innerHTML = '<div class="ab-mustread-empty">暂无必读文章</div>'
+      return
+    }
+    listEl.innerHTML = mustRead.map((m, i) => `
+      <div class="ab-mustread-item ${m.read ? 'read' : ''}">
+        <span class="ab-mustread-item-title" title="${m.url}">${m.title || m.url}</span>
+        <span class="ab-mustread-item-status">${m.read ? '✅' : ''}</span>
+        <button class="ab-mustread-remove" data-idx="${i}">×</button>
+      </div>
+    `).join('')
+    // 删除按钮
+    listEl.querySelectorAll('.ab-mustread-remove').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation()
+        const idx = parseInt(btn.dataset.idx)
+        this.options.onRemoveMustRead?.(idx)
+      })
+    })
   }
 
   _syncButtons() {
@@ -280,6 +389,24 @@ export class ControlPanel {
       .ab-dot.stopped { background: #f44336; }
       @keyframes ab-pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
       .dark #${PANEL_ID}, [data-theme="dark"] #${PANEL_ID} { background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%); }
+      .ab-rest { margin-top: 10px; padding: 10px; background: rgba(255,193,7,.2); border-radius: 6px; text-align: center; }
+      .ab-rest-text { font-size: 12px; margin-bottom: 6px; }
+      .ab-rest-countdown { font-weight: 700; font-size: 14px; }
+      .ab-btn-skip-rest { background: #f44336; }
+      .ab-mustread { margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,.2); }
+      .ab-mustread-title { font-size: 11px; font-weight: 600; margin-bottom: 6px; opacity: .9; }
+      .ab-mustread-add { display: flex; gap: 4px; margin-bottom: 6px; }
+      .ab-mustread-input { flex: 1; padding: 4px 6px; border: 1px solid rgba(255,255,255,.2); border-radius: 4px; background: rgba(255,255,255,.15); color: #fff; font-size: 11px; outline: none; }
+      .ab-mustread-input::placeholder { color: rgba(255,255,255,.5); }
+      .ab-mustread-add-btn { flex-shrink: 0; }
+      .ab-mustread-list { max-height: 150px; overflow-y: auto; }
+      .ab-mustread-item { display: flex; align-items: center; gap: 4px; padding: 3px 0; font-size: 11px; border-bottom: 1px solid rgba(255,255,255,.1); }
+      .ab-mustread-item.read { opacity: .5; }
+      .ab-mustread-item-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 150px; }
+      .ab-mustread-item-status { flex-shrink: 0; font-size: 10px; }
+      .ab-mustread-remove { background: none; border: none; color: rgba(255,255,255,.5); cursor: pointer; font-size: 14px; padding: 0 2px; }
+      .ab-mustread-remove:hover { color: #f44336; }
+      .ab-mustread-empty { font-size: 11px; opacity: .5; padding: 4px 0; }
     `
     document.head.appendChild(style)
   }

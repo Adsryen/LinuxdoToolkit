@@ -42,7 +42,10 @@ export class AutoBrowseModule extends Module {
         maxSessionViews: 50,
         maxSessionLikes: 50,
         autoResume: false,
-        readAll: false,       // 单篇阅读模式：true 看完，false 读到约 50~65%
+        readAll: false,
+        restEnabled: false,
+        restInterval: 15,
+        restDuration: 5,
       },
     })
 
@@ -53,11 +56,16 @@ export class AutoBrowseModule extends Module {
     this.running = false
     this.stuckTimer = null
     this.lastActivity = 0
+    this.mustReadList = []
     this.stats = { sessionViews: 0, sessionLikes: 0, totalViews: 0, totalLikes: 0 }
   }
 
   async onInit(s) {
     await history.init()
+
+    // 加载必读列表
+    this.mustReadList = await this._loadMustRead()
+
     this.scroll = new ScrollController(SPEED_PRESETS[s.speed] || SPEED_PRESETS.normal)
     this.liker = new LikeSystem({
       enabled: s.enableLike,
@@ -68,7 +76,14 @@ export class AutoBrowseModule extends Module {
       maxViews: s.maxSessionViews,
       maxLikes: s.maxSessionLikes,
       readAll: s.readAll,
+      restEnabled: s.restEnabled,
+      browseInterval: s.restInterval,
+      restDuration: s.restDuration,
+      mustRead: this.mustReadList,
       onStats: (stats) => this._onStats(stats),
+      onMustReadDone: (item) => this._onMustReadDone(item),
+      onResting: (duration, endTime) => this.panel?.setResting(duration, endTime),
+      onRestEnd: () => this.panel?.setRestEnd(),
     })
 
     // 创建面板
@@ -78,6 +93,7 @@ export class AutoBrowseModule extends Module {
       enableLike: s.enableLike,
       likeChance: s.likeChance,
       readAll: s.readAll,
+      mustRead: this.mustReadList,
       onStart: () => this.start(),
       onStop: () => this.stop(),
       onSpeedChange: (v) => this._setSpeed(v),
@@ -86,6 +102,9 @@ export class AutoBrowseModule extends Module {
       onLikeChanceChange: (v) => this._setLikeChance(v),
       onReadAllToggle: (v) => this._setReadAll(v),
       onClearHistory: () => this.engine?.clearHistory(),
+      onAddMustRead: (url) => this._addMustRead(url),
+      onRemoveMustRead: (idx) => this._removeMustRead(idx),
+      onSkipRest: () => this.engine?.skipRest(),
     })
     this.panel.mount()
 
@@ -135,7 +154,20 @@ export class AutoBrowseModule extends Module {
         { key: 'maxSessionLikes', label: '单次最大点赞', type: 'number', default: 50 },
         { key: 'autoResume',   label: '自动恢复运行', type: 'toggle', default: false },
         { key: 'readAll',      label: '单篇阅读深度',  type: 'toggle', default: false, description: '全部：从第一楼看到底；50%：读到约 50~65% 后进入下一帖' },
+        { key: 'restEnabled',  label: '启用休息机制', type: 'toggle', default: false },
+        { key: 'restInterval', label: '浏览间隔(分钟)', type: 'number', default: 15 },
+        { key: 'restDuration', label: '休息时长(分钟)', type: 'number', default: 5 },
       ],
+    }
+  }
+
+  onSettingsChange(newSettings) {
+    this.settings = { ...this.settings, ...newSettings }
+    // 更新引擎休息参数
+    if (this.engine) {
+      this.engine.restEnabled = newSettings.restEnabled ?? this.engine.restEnabled
+      this.engine.browseTime = (newSettings.restInterval ?? (this.engine.browseTime / 60000)) * 60000
+      this.engine.restTime = (newSettings.restDuration ?? (this.engine.restTime / 60000)) * 60000
     }
   }
 
@@ -229,8 +261,52 @@ export class AutoBrowseModule extends Module {
   }
 
   _shouldResume(s) {
-    // 简化为只检查 localStorage 中的运行标记
-    // 使用整页跳转（window.location.href），每次页面加载时自动恢复
     return this._loadRunning()
+  }
+
+  // ========== 必读列表管理 ==========
+
+  async _loadMustRead() {
+    try {
+      const result = await chrome.storage.local.get('toolkit.module.auto-browse.mustRead')
+      return result['toolkit.module.auto-browse.mustRead'] || []
+    } catch { return [] }
+  }
+
+  async _saveMustRead() {
+    try {
+      await chrome.storage.local.set({ 'toolkit.module.auto-browse.mustRead': this.mustReadList })
+    } catch {}
+  }
+
+  async _addMustRead(url) {
+    // 上限 50 条
+    if (this.mustReadList.length >= 50) return
+    // 去重
+    if (this.mustReadList.some(m => m.url === url)) return
+    const item = {
+      url,
+      title: url.replace(/https?:\/\/linux\.do\/t\/[^/]+\/\d+/, '未知话题').replace(/\/$/, ''),
+      addedAt: Date.now(),
+      read: false,
+    }
+    this.mustReadList.push(item)
+    await this._saveMustRead()
+    // 同步到 engine
+    if (this.engine) this.engine.mustReadList = this.mustReadList
+    this.panel?.updateMustRead(this.mustReadList)
+  }
+
+  async _removeMustRead(idx) {
+    if (idx < 0 || idx >= this.mustReadList.length) return
+    this.mustReadList.splice(idx, 1)
+    await this._saveMustRead()
+    if (this.engine) this.engine.mustReadList = this.mustReadList
+    this.panel?.updateMustRead(this.mustReadList)
+  }
+
+  async _onMustReadDone(item) {
+    await this._saveMustRead()
+    this.panel?.updateMustRead(this.mustReadList)
   }
 }

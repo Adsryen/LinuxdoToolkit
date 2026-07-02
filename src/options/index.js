@@ -45,6 +45,9 @@ const MODULE_SCHEMAS = {
       { key: 'maxSessionLikes', label: '单次最大点赞', type: 'number', default: 50 },
       { key: 'autoResume',      label: '自动恢复运行', type: 'toggle', default: false },
       { key: 'readAll',         label: '单篇阅读深度', type: 'toggle', default: false, description: '全部：从第一楼看到底；50%：读到约 50~65% 后进入下一帖' },
+      { key: 'restEnabled',    label: '启用休息机制', type: 'toggle', default: false },
+      { key: 'restInterval',   label: '浏览间隔(分钟)', type: 'number', default: 15, min: 5, max: 120 },
+      { key: 'restDuration',   label: '休息时长(分钟)', type: 'number', default: 5, min: 1, max: 30 },
     ],
   },
   'credit': {

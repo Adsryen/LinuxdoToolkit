@@ -38,13 +38,20 @@ export class BrowseEngine {
     this.liker = liker
     this.listPath = options.listPath || '/latest'
     this.maxLikes = options.maxLikes || 50
+    this.maxViews = options.maxViews || 50
     this.readAll = options.readAll || false
     this.onStats = options.onStats || (() => {})
     this.onInternalNavigate = options.onInternalNavigate || (() => {})
+    this.onMustReadDone = options.onMustReadDone || (() => {})
+    this.onResting = options.onResting || (() => {})
+    this.onRestEnd = options.onRestEnd || (() => {})
 
     // 运行状态
     this.running = false
     this.isScrolling = false
+    this.resting = false
+    this._restTimer = null
+    this._restSkipResolve = null
 
     // 话题列表（跨页面持久化）
     this.topicList = this._lsLoad('topicList', [])
@@ -52,10 +59,14 @@ export class BrowseEngine {
     // 累计浏览时间
     this.accumulatedTime = this._lsLoad('accumulatedTime', 0)
     this.lastActionTime = 0
-    this.browseTime = 3600000   // 1 小时
-    this.restTime = 600000      // 10 分钟
+    this.browseTime = (options.browseInterval || 60) * 60000  // 分钟转 ms
+    this.restTime = (options.restDuration || 10) * 60000
+    this.restEnabled = options.restEnabled !== false
 
-    // 必读文章状态
+    // 必读文章
+    this.mustReadList = options.mustRead || []
+
+    // 必读文章状态（兼容旧逻辑）
     this.firstUseChecked = this._lsLoad('firstUseChecked', false)
     this.likesCount = this._lsLoad('likesCount', 0)
     this.selectedPost = this._lsLoad('selectedPost', null)
@@ -98,7 +109,11 @@ export class BrowseEngine {
     const isTopicPage = this._isTopicPage()
     console.log('[BrowseEngine] 启动, 话题页:', isTopicPage, ', 话题列表剩余:', this.topicList.length)
 
-    if (!this.firstUseChecked) {
+    // 优先必读列表中的未读文章
+    const pendingMustRead = (this.mustReadList || []).filter(m => !m.read)
+    if (pendingMustRead.length > 0) {
+      this._handleMustRead(pendingMustRead)
+    } else if (!this.firstUseChecked) {
       this._handleFirstUse()
     } else if (isTopicPage) {
       this._startScrolling()
@@ -110,6 +125,15 @@ export class BrowseEngine {
   stop() {
     this.running = false
     this.isScrolling = false
+    this.resting = false
+    if (this._restTimer) {
+      clearInterval(this._restTimer)
+      this._restTimer = null
+    }
+    if (this._restSkipResolve) {
+      this._restSkipResolve()
+      this._restSkipResolve = null
+    }
     this._lsSave('accumulatedTime', this.accumulatedTime)
     console.log('[BrowseEngine] 停止')
   }
@@ -149,6 +173,29 @@ export class BrowseEngine {
   }
 
   // ========== 必读文章流程 ==========
+
+  async _handleMustRead(mustReadList) {
+    if (!this.running || !mustReadList.length) return
+
+    const next = mustReadList[0]
+    const currentUrl = window.location.href.replace(/\/$/, '')
+    const mustReadUrl = next.url.replace(/\/$/, '')
+
+    if (currentUrl.includes(mustReadUrl.replace('https://linux.do', ''))) {
+      // 在当前必读文章页面，正常浏览
+      console.log(`[BrowseEngine] 浏览必读文章: ${next.title || next.url}`)
+      await this._startScrolling()
+      // 标记为已读
+      next.read = true
+      next.readAt = Date.now()
+      this.onMustReadDone?.(next)
+    } else {
+      // 跳转到必读文章
+      console.log(`[BrowseEngine] 导航到必读文章: ${next.title || next.url}`)
+      this.onInternalNavigate?.(next.url)
+      window.location.href = next.url
+    }
+  }
 
   async _handleFirstUse() {
     if (!this.running) return
@@ -359,8 +406,14 @@ export class BrowseEngine {
 
       // 2. 累计时间，检查休息
       this._accumulateTime()
-      if (this.accumulatedTime >= this.browseTime) {
+      if (this.restEnabled && this.accumulatedTime >= this.browseTime) {
         await this._takeRest()
+      }
+
+      // 检查是否达到浏览上限
+      if (this.sessionViews >= this.maxViews) {
+        console.log('[BrowseEngine] 达到本次浏览上限，暂停')
+        break
       }
 
       // 3. 微停顿 / 长休息 / 内容驻留
@@ -419,21 +472,51 @@ export class BrowseEngine {
     this.lastActionTime = now
   }
 
-  async _takeRest() {
+  async _takeRest(durationMs) {
+    const restDuration = durationMs || this.restTime
     this.accumulatedTime = 0
     this._lsSave('accumulatedTime', 0)
-    console.log(`[BrowseEngine] 休息 ${this.restTime / 60000} 分钟...`)
+    this.resting = true
+    console.log(`[BrowseEngine] 休息 ${restDuration / 60000} 分钟...`)
     this._emitStats()
 
-    // 休息期间仍然检查 running 状态
-    const start = Date.now()
-    while (Date.now() - start < this.restTime && this.running) {
-      await sleep(1000)
-    }
+    // 通知面板：休息中
+    const endTime = Date.now() + restDuration
+    this.onResting?.(restDuration, endTime)
+
+    // 等待休息时间结束，支持手动跳过
+    await new Promise((resolve) => {
+      this._restSkipResolve = resolve
+      this._restTimer = setInterval(() => {
+        if (!this.running || Date.now() >= endTime) {
+          clearInterval(this._restTimer)
+          this._restTimer = null
+          this._restSkipResolve = null
+          resolve()
+        }
+      }, 1000)
+    })
+
+    this.resting = false
+    this.onRestEnd?.()
 
     if (this.running) {
       console.log('[BrowseEngine] 休息结束，继续浏览')
       this.lastActionTime = Date.now()
+    }
+  }
+
+  /**
+   * 跳过休息，立即继续
+   */
+  skipRest() {
+    if (this._restTimer) {
+      clearInterval(this._restTimer)
+      this._restTimer = null
+    }
+    if (this._restSkipResolve) {
+      this._restSkipResolve()
+      this._restSkipResolve = null
     }
   }
 
