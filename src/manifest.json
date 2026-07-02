@@ -70,10 +70,24 @@
     },
     "open-settings": {
       "suggested_key": {
+        "default": "Ctrl+Shift+Comma",
+        "mac": "Command+Shift+Comma"
+      },
+      "description": "打开扩展设置"
+    },
+    "toggle-toolbar": {
+      "suggested_key": {
         "default": "Ctrl+Shift+L",
         "mac": "Command+Shift+L"
       },
-      "description": "打开扩展设置"
+      "description": "切换工具栏显示/隐藏"
+    },
+    "toggle-module": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+M",
+        "mac": "Command+Shift+M"
+      },
+      "description": "快速启用/禁用当前页面模块"
     }
   },
 

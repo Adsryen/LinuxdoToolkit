@@ -95,6 +95,8 @@ async function handleMessage(message, sender, sendResponse) {
       case 'SET_MODULE_SETTINGS': {
         const key = `toolkit.module.${message.moduleId}`
         await chrome.storage.local.set({ [key]: message.value })
+        // 同时通知 content script 更新模块配置
+        forwardToContent(message, () => {})
         sendResponse({ success: true })
         break
       }
@@ -251,7 +253,7 @@ async function handleImportBackup(data, strategy, sendResponse) {
 
 // ========== 快捷键 ==========
 
-chrome.commands.onCommand.addListener((command) => {
+chrome.commands.onCommand.addListener(async (command) => {
   switch (command) {
     case 'toggle-dark-mode':
       forwardToContent({ type: 'TOGGLE_MODULE', moduleId: 'ui-enhance' }, () => {})
@@ -259,6 +261,22 @@ chrome.commands.onCommand.addListener((command) => {
     case 'open-settings':
       chrome.runtime.openOptionsPage()
       break
+    case 'toggle-toolbar': {
+      const result = await chrome.storage.local.get('toolkit.global')
+      const global = result['toolkit.global'] || {}
+      global.toolbarEnabled = !global.toolbarEnabled
+      await chrome.storage.local.set({ 'toolkit.global': global })
+      forwardToContent({ type: 'TOGGLE_TOOLBAR', enabled: global.toolbarEnabled }, () => {})
+      break
+    }
+    case 'toggle-module': {
+      // 获取当前活跃的 linux.do tab
+      const tabs = await chrome.tabs.query({ active: true, url: ['https://linux.do/*', 'https://www.linux.do/*'] })
+      if (tabs.length > 0) {
+        forwardToContent({ type: 'TOGGLE_MODULE', moduleId: 'auto-browse' }, () => {})
+      }
+      break
+    }
   }
 })
 

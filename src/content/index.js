@@ -114,6 +114,21 @@ class LinuxdoToolkit {
           })
           break
 
+        case 'SET_MODULE_SETTINGS': {
+          const module = this.moduleManager.getModule(message.moduleId)
+          if (module) {
+            await module.updateSettings(message.value)
+          }
+          sendResponse({ success: true })
+          break
+        }
+
+        case 'TOGGLE_TOOLBAR': {
+          // 工具栏显示/隐藏切换由 toolbar 模块处理
+          sendResponse({ success: true })
+          break
+        }
+
         default:
           sendResponse({ success: false, error: '未知消息类型' })
       }

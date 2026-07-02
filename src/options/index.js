@@ -26,6 +26,182 @@ const CATEGORY_NAMES = {
   other: '其他',
 }
 
+// ========== 模块设置 Schema ==========
+// 与各模块的 getSettingsSchema() 保持一致，Options 页独立使用
+const MODULE_SCHEMAS = {
+  'auto-browse': {
+    fields: [
+      { key: 'speed',           label: '浏览速度',     type: 'select', options: [
+        { value: 'slow', label: '慢速' }, { value: 'normal', label: '正常' }, { value: 'fast', label: '快速' },
+      ], default: 'normal' },
+      { key: 'listType',        label: '列表来源',     type: 'select', options: [
+        { value: 'latest', label: '最新' }, { value: 'top', label: '热门' }, { value: 'new', label: '新帖' },
+      ], default: 'latest' },
+      { key: 'enableLike',      label: '随机点赞',     type: 'toggle', default: true },
+      { key: 'likeChance',      label: '点赞概率',     type: 'select', options: [
+        { value: 'low', label: '低 5%' }, { value: 'medium', label: '中 15%' }, { value: 'high', label: '高 25%' }, { value: 'veryHigh', label: '极高 40%' },
+      ], default: 'medium' },
+      { key: 'maxSessionViews', label: '单次最大浏览', type: 'number', default: 50 },
+      { key: 'maxSessionLikes', label: '单次最大点赞', type: 'number', default: 50 },
+      { key: 'autoResume',      label: '自动恢复运行', type: 'toggle', default: false },
+      { key: 'readAll',         label: '单篇阅读深度', type: 'toggle', default: false, description: '全部：从第一楼看到底；50%：读到约 50~65% 后进入下一帖' },
+    ],
+  },
+  'credit': {
+    fields: [
+      { key: 'refreshInterval', label: '刷新间隔', type: 'select', options: [
+        { value: 60000, label: '1 分钟' }, { value: 300000, label: '5 分钟' }, { value: 600000, label: '10 分钟' }, { value: 1800000, label: '30 分钟' },
+      ], default: 300000 },
+    ],
+  },
+  'side-topic': {
+    fields: [
+      { key: 'feed',      label: '默认 Feed', type: 'select', options: [
+        { value: 'latest', label: '最新' }, { value: 'top', label: '热门' }, { value: 'new', label: '新帖' }, { value: 'unread', label: '未读' },
+      ], default: 'latest' },
+      { key: 'collapsed', label: '默认折叠',   type: 'toggle', default: false },
+    ],
+  },
+  'peek': {
+    fields: [
+      { key: 'mode',            label: '默认预览模式',     type: 'select', options: [
+        { value: 'summary', label: '摘要' }, { value: 'detail', label: '详情（iframe）' },
+      ], default: 'summary' },
+      { key: 'drawerWidth',     label: '抽屉宽度 (%)',     type: 'number', default: 50 },
+      { key: 'autoScrollSpeed', label: '自动滚动速度 (px/s)', type: 'number', default: 42 },
+      { key: 'enablePrefetch',  label: '悬停预加载',       type: 'toggle', default: true },
+      { key: 'trackView',       label: '记录浏览历史',     type: 'toggle', default: true },
+    ],
+  },
+  'ui-enhance': {
+    fields: [
+      { key: 'theme',       label: '主题',     type: 'select', options: [
+        { value: 'auto', label: '🔄 跟随系统' }, { value: 'dark', label: '🌙 暗黑' }, { value: 'green', label: '🌿 绿色' }, { value: 'purple', label: '💜 紫色' },
+      ], default: 'auto' },
+      { key: 'compactMode', label: '紧凑模式', type: 'toggle', default: false, description: '减小间距，显示更多内容' },
+      { key: 'wideMode',    label: '宽屏模式', type: 'toggle', default: false, description: '扩大内容区域宽度' },
+    ],
+  },
+}
+
+// ========== 通用表单渲染器 ==========
+
+class FormRenderer {
+  /**
+   * @param {object} schema - { fields: [...] }
+   * @param {object} values - 当前值 { key: value }
+   */
+  constructor(schema, values = {}) {
+    this.schema = schema
+    this.values = { ...values }
+    this.onChange = null
+  }
+
+  /**
+   * 渲染表单为 DOM 文档片段
+   * @returns {DocumentFragment}
+   */
+  render() {
+    const frag = document.createDocumentFragment()
+    for (const field of this.schema.fields) {
+      const value = field.key in this.values ? this.values[field.key] : field.default
+      const el = this._renderField(field, value)
+      frag.appendChild(el)
+    }
+    return frag
+  }
+
+  _renderField(field, value) {
+    const row = document.createElement('div')
+    row.className = 'form-field'
+
+    // 左侧：label + description
+    const left = document.createElement('div')
+    left.className = 'form-field-left'
+    const label = document.createElement('div')
+    label.className = 'form-field-label'
+    label.textContent = field.label
+    left.appendChild(label)
+    if (field.description) {
+      const desc = document.createElement('div')
+      desc.className = 'form-field-desc'
+      desc.textContent = field.description
+      left.appendChild(desc)
+    }
+
+    // 右侧：控件
+    const right = document.createElement('div')
+    right.className = 'form-field-right'
+
+    switch (field.type) {
+      case 'toggle':
+        right.appendChild(this._renderToggle(field, value))
+        break
+      case 'select':
+        right.appendChild(this._renderSelect(field, value))
+        break
+      case 'number':
+        right.appendChild(this._renderNumber(field, value))
+        break
+    }
+
+    row.appendChild(left)
+    row.appendChild(right)
+    return row
+  }
+
+  _renderToggle(field, value) {
+    const label = document.createElement('label')
+    label.className = 'toggle'
+    const input = document.createElement('input')
+    input.type = 'checkbox'
+    input.checked = !!value
+    input.addEventListener('change', () => {
+      this.values[field.key] = input.checked
+      this.onChange?.(field.key, input.checked)
+    })
+    const span = document.createElement('span')
+    span.className = 'toggle-slider'
+    label.appendChild(input)
+    label.appendChild(span)
+    return label
+  }
+
+  _renderSelect(field, value) {
+    const select = document.createElement('select')
+    select.className = 'detail-select'
+    for (const opt of (field.options || [])) {
+      const option = document.createElement('option')
+      option.value = opt.value
+      option.textContent = opt.label
+      option.selected = (String(value) === String(opt.value))
+      select.appendChild(option)
+    }
+    select.addEventListener('change', () => {
+      this.values[field.key] = select.value
+      this.onChange?.(field.key, select.value)
+    })
+    return select
+  }
+
+  _renderNumber(field, value) {
+    const input = document.createElement('input')
+    input.type = 'number'
+    input.className = 'detail-input'
+    input.value = value ?? field.default
+    if (field.min !== undefined) input.min = field.min
+    if (field.max !== undefined) input.max = field.max
+    input.addEventListener('input', () => {
+      const num = parseInt(input.value, 10)
+      if (!isNaN(num)) {
+        this.values[field.key] = num
+        this.onChange?.(field.key, num)
+      }
+    })
+    return input
+  }
+}
+
 // ========== DOM ==========
 const $ = (sel) => document.querySelector(sel)
 const $$ = (sel) => document.querySelectorAll(sel)
@@ -62,20 +238,24 @@ function setupNavigation() {
 }
 
 // ========== 模块管理 ==========
+let activeDetailPanel = null
+const debounceTimers = {}
+
 async function loadModules() {
   const grid = $('#module-grid')
   const enabledMap = await getEnabledModules()
 
-  // 未来可从 content 动态获取，当前用默认列表
   let html = ''
   for (const m of DEFAULT_MODULES) {
     const enabled = enabledMap[m.id] !== false
+    const hasSchema = !!MODULE_SCHEMAS[m.id]
     html += `
       <div class="module-card" data-id="${m.id}">
         <div class="module-card-header">
           <div class="module-card-info">
             <span class="module-card-icon">${m.icon}</span>
             <span class="module-card-name">${m.name}</span>
+            ${hasSchema ? '<span class="module-card-gear">⚙</span>' : ''}
           </div>
           <label class="toggle">
             <input type="checkbox" data-module-id="${m.id}" ${enabled ? 'checked' : ''}>
@@ -92,14 +272,124 @@ async function loadModules() {
   // toggle 事件
   grid.querySelectorAll('input[type="checkbox"]').forEach(input => {
     input.addEventListener('change', async (e) => {
+      e.stopPropagation()
       const moduleId = e.target.dataset.moduleId
       const enabled = e.target.checked
       await setModuleEnabled(moduleId, enabled)
-      // 通知 content script
       try {
         await sendMessage({ type: enabled ? 'ENABLE_MODULE' : 'DISABLE_MODULE', moduleId })
       } catch {}
       toast(enabled ? `${getModuleName(moduleId)} 已启用` : `${getModuleName(moduleId)} 已禁用`, 'success')
+    })
+  })
+
+  // 卡片点击 → 展开/折叠详情面板
+  grid.querySelectorAll('.module-card').forEach(card => {
+    card.addEventListener('click', async (e) => {
+      // 点击 toggle 不触发面板
+      if (e.target.closest('.toggle')) return
+      const moduleId = card.dataset.id
+      if (!MODULE_SCHEMAS[moduleId]) return
+      toggleModuleDetail(moduleId, card)
+    })
+  })
+}
+
+/**
+ * 展开/折叠模块详情面板
+ */
+async function toggleModuleDetail(moduleId, card) {
+  // 如果已有面板，先关闭
+  if (activeDetailPanel) {
+    closeDetailPanel()
+  }
+
+  // 如果点击的是已展开的卡片，折叠即可
+  if (card.classList.contains('expanded')) {
+    return
+  }
+
+  // 加载当前设置值
+  const schema = MODULE_SCHEMAS[moduleId]
+  const currentValues = await loadModuleSettings(moduleId)
+
+  // 构建默认值（schema default → 当前值覆盖）
+  const values = {}
+  for (const field of schema.fields) {
+    values[field.key] = field.default
+  }
+  Object.assign(values, currentValues)
+
+  // 创建详情面板
+  const detail = document.createElement('div')
+  detail.className = 'module-detail'
+  detail.id = `module-detail-${moduleId}`
+
+  const title = document.createElement('div')
+  title.className = 'module-detail-title'
+  title.textContent = `${getModuleName(moduleId)} 设置`
+  detail.appendChild(title)
+
+  // 渲染表单
+  const formRenderer = new FormRenderer(schema, values)
+  formRenderer.onChange = (key, newValue) => {
+    values[key] = newValue
+    debounceSaveSettings(moduleId, values)
+  }
+  detail.appendChild(formRenderer.render())
+
+  // 插入到卡片后面
+  card.classList.add('expanded')
+  card.after(detail)
+  activeDetailPanel = { moduleId, card, detail }
+}
+
+function closeDetailPanel() {
+  if (!activeDetailPanel) return
+  activeDetailPanel.card.classList.remove('expanded')
+  activeDetailPanel.detail.remove()
+  activeDetailPanel = null
+}
+
+/**
+ * Debounce 保存模块设置（300ms）
+ */
+function debounceSaveSettings(moduleId, values) {
+  if (debounceTimers[moduleId]) clearTimeout(debounceTimers[moduleId])
+  debounceTimers[moduleId] = setTimeout(async () => {
+    await saveModuleSettings(moduleId, values)
+    delete debounceTimers[moduleId]
+  }, 300)
+}
+
+/**
+ * 保存模块设置到 storage 并通知 content script
+ */
+async function saveModuleSettings(moduleId, values) {
+  const key = `toolkit.module.${moduleId}`
+  try {
+    const result = await chrome.storage.local.get(key)
+    const current = result[key] || {}
+    const merged = { ...current, ...values }
+    await chrome.storage.local.set({ [key]: merged })
+    // 通知 content script 更新模块配置
+    try {
+      await sendMessage({ type: 'SET_MODULE_SETTINGS', moduleId, value: merged })
+    } catch {}
+    toast(`${getModuleName(moduleId)} 设置已保存`, 'success')
+  } catch (e) {
+    toast('保存失败: ' + e.message, 'error')
+  }
+}
+
+/**
+ * 从 storage 加载模块设置
+ */
+function loadModuleSettings(moduleId) {
+  return new Promise((resolve) => {
+    const key = `toolkit.module.${moduleId}`
+    chrome.storage.local.get(key, (result) => {
+      resolve(result[key] || {})
     })
   })
 }

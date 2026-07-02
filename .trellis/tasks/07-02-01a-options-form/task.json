@@ -3,7 +3,7 @@
   "name": "01a-options-form",
   "title": "通用表单渲染器 + 快捷键配置",
   "description": "Phase 1 剩余项：实现 Options 页通用表单渲染器（根据模块 settings schema 自动生成配置 UI），以及快捷键配置功能。",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": null,
   "scope": null,
   "package": null,
