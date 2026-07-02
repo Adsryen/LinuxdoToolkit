@@ -468,13 +468,20 @@ export class BrowseEngine {
 
   /**
    * 从页面 DOM 提取总回复数
+   * 优先从 Discourse timeline 组件读取（准确），fallback 到 DOM 计数
    */
   _extractTotalPosts() {
-    // 从 .topic-post 数量推断
+    const replies = document.querySelector('.timeline-replies')
+    if (replies) {
+      const match = replies.textContent.match(/(\d+)\s*\/\s*(\d+)/)
+      if (match) return parseInt(match[2])
+    }
+
+    // fallback: 从 .topic-post 数量推断
     const postCount = document.querySelectorAll('.topic-post').length
     if (postCount > 0) return postCount
 
-    // 从页面元数据获取
+    // fallback: 从页面元数据获取
     const meta = document.querySelector('[data-post-count]')
     if (meta) return parseInt(meta.dataset.postCount) || 0
 
@@ -482,13 +489,20 @@ export class BrowseEngine {
   }
 
   /**
-   * 获取当前页面最后一个可见帖子的楼层号
+   * 获取当前浏览到的楼层号
+   * 优先从 Discourse timeline 组件读取（准确），fallback 到 DOM 计数
    */
   _getCurrentPostNumber() {
+    const replies = document.querySelector('.timeline-replies')
+    if (replies) {
+      const match = replies.textContent.match(/(\d+)\s*\/\s*(\d+)/)
+      if (match) return parseInt(match[1])
+    }
+
+    // fallback: 从 DOM 中最后一个帖子的楼层号获取
     const posts = document.querySelectorAll('.topic-post')
     if (posts.length === 0) return 0
 
-    // 获取最后一个帖子的楼层号
     const lastPost = posts[posts.length - 1]
     const postNumber = lastPost.querySelector('.post-number')
     if (postNumber) {

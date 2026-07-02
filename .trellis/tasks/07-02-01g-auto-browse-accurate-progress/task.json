@@ -3,7 +3,7 @@
   "name": "01g-auto-browse-accurate-progress",
   "title": "自动浏览回写准确的浏览楼数",
   "description": "当前修复在离开话题页时通过 DOM 元素计数获取楼数，但 Discourse 是懒加载，DOM 中 .topic-post 数量不等于实际滚动到的楼层。需要在跳转前基于滚动位置/已加载的帖子数据准确计算出实际浏览到的楼数，回写 storage 后再跳转。",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": null,
   "scope": null,
   "package": null,
